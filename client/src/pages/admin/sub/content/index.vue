@@ -136,9 +136,11 @@
         </t-form-item>
 
         <t-form-item label="自定义" name="ext">
-          <t-space direction="vertical" style="flex: 1;">
+          <t-space direction="vertical" size="2px" style="flex: 1;">
             <t-textarea v-model="formData.data.ext"></t-textarea>
-            <p>解析需填写{type: 0|1} 0 标识 web 1;标识 json</p>
+            <p v-for="(item, index) in DATA_EXT_INFO" :key="index" class="ext-tip">
+              {{ item.desc }}
+            </p>
           </t-space>
         </t-form-item>
 
@@ -157,12 +159,15 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { RefreshIcon, InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { computed, onMounted, ref, reactive } from 'vue';
-import _ from 'lodash';
+import clone from 'lodash/clone';
 
 import { addContent, fetchContentCreator, fetchContentList, delContent, delBatchContent, putContent } from '@/api/content';
 import { upload } from '@/api/system';
 import { prefix } from '@/config/global';
 import { useSettingStore } from '@/store';
+import { info } from '@/utils/info/ext';
+
+const DATA_EXT_INFO = info;
 
 const store = useSettingStore();
 
@@ -325,7 +330,7 @@ const onEditDetail = (slot) => {
   const data = slot.row;
   formData.value.raw = data;
 
-  const dataCopy = _.clone(data); // 重要
+  const dataCopy = clone(data); // 重要
   delete dataCopy.id;
 
   formData.value.data = dataCopy;
@@ -375,6 +380,21 @@ const onConfirmBatchDelete = async () => {
 const onDialogSubmit = async ({ validateResult, firstError }) => {
   if (validateResult === true) {
     const type = active.dialog;
+
+
+    if (formData.value.data.ext) {
+      try {
+        const parsedExt = JSON.parse(formData.value.data.ext);
+        if (typeof parsedExt !== 'object' || parsedExt === null) {
+          MessagePlugin.warning('扩展参数非标准JSON格式');
+          return;
+        }
+      } catch {
+        MessagePlugin.warning('扩展参数非标准JSON格式');
+        return;
+      }
+    };
+
     try {
       let response;
       if (type === 'add') response = await addContent(formData.value.data);
@@ -403,7 +423,7 @@ const onDialogReset = () => {
     };
   } else if (type === 'edit') {
     const data = { ...formData.value.raw };
-    const dataCopy = _.clone(data); // 重要
+    const dataCopy = clone(data); // 重要
     delete dataCopy.id;
     formData.value.data = dataCopy;
   };
@@ -501,5 +521,11 @@ const requestMethod = (file) => {
 
 .form-item-content {
   width: 100%;
+}
+
+.ext-tip {
+  color: var(--td-text-color-placeholder);
+  font: var(--td-font-body-small);
+  padding: var(--td-comp-paddingTB-xxs) 0;
 }
 </style>

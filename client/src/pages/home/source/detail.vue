@@ -55,12 +55,26 @@
             </div>
           </div>
           <div v-if="detailData.ext" class="detail-content-item">
-            <p class="title">扩展参数</p>
+            <p class="title">
+              <span>扩展参数</span>
+              <t-tooltip>
+                <template #content>
+                  <p v-for="(item, index) in DATA_EXT_INFO" :key="index" class="ext-tip">
+                    {{ item.desc }}
+                  </p>
+                </template>
+                <info-circle-icon size="16px" style="margin-left: 6px; padding-bottom: 2px;" />
+              </t-tooltip>
+            </p>
             <t-textarea :value="detailData.ext" :autosize="{ minRows: 3, maxRows: 5 }" :readonly="true"
               class="textarea" />
           </div>
         </t-watermark>
       </t-card>
+
+      <!-- <t-card title="探讨交流" :bordered="false" class="card-item detail-content">
+
+      </t-card> -->
     </div>
   </div>
 </template>
@@ -68,7 +82,7 @@
 <script lang="js" setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { LinkIcon } from 'tdesign-icons-vue-next';
+import { LinkIcon, InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 
 import { fetchContentDetail } from '@/api/content';
@@ -76,6 +90,9 @@ import { fetchSubscribeCode } from '@/api/subscribe';
 import { formatDate } from '@/utils/tool';
 import { base64 } from '@/utils/encode';
 import request from '@/utils/request';
+import { info } from '@/utils/info/ext';
+
+const DATA_EXT_INFO = info;
 
 const route = useRoute();
 
@@ -321,6 +338,7 @@ const onShareZyplayer = async () => {
           }
         }
 
+
         :deep(.t-textarea) {
           border-radius: var(--td-radius-medium);
           border-width: 2px;
@@ -329,5 +347,10 @@ const onShareZyplayer = async () => {
       }
     }
   }
+}
+
+.ext-tip {
+  font: var(--td-font-body-small);
+  padding: var(--td-comp-paddingTB-xxs) 0;
 }
 </style>

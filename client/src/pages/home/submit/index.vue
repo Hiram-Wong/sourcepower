@@ -1,7 +1,7 @@
 <template>
   <div class="submit-container view-container">
     <div class="content">
-      <t-card title="课堂助力" :bordered="false" class="card-item create">
+      <t-card title="学习课堂" :bordered="false" class="card-item create">
         <p class="title">三步学会属于你自己的创作</p>
         <div class="step-info step-item">
           <p class="use-title">
@@ -31,6 +31,7 @@
           <p class="tip">2.上传后即创作者授权平台拥有宣传分发权利</p>
           <p class="tip">3.数据内容需审核通过后展示</p>
           <p class="tip">4.请勿频繁触发文件上传, 会拉黑</p>
+          <p class="tip">5.10s内多次提交仅第一次提交成功</p>
         </div>
         <div class="submit-type">
           <t-radio-group v-model="active.dialog" variant="default-filled" v-if="historyList.length > 0">
@@ -38,7 +39,8 @@
             <t-radio-button value="edit">编辑</t-radio-button>
           </t-radio-group>
         </div>
-        <t-form :rules="FORM_RULES" :data="formData.data" :colon="true" @reset="onReset" @submit="onSubmit">
+        <t-form label-align="right" :rules="FORM_RULES" :data="formData.data" :label-width="60" @reset="onReset"
+          @submit="onSubmit">
           <t-form-item label="名称" name="name">
             <t-input v-model="formData.data.name" placeholder="请输入名称, 如xx影视"></t-input>
           </t-form-item>
@@ -56,27 +58,33 @@
               <t-radio-button :value="true">是</t-radio-button>
               <t-radio-button :value="false">否</t-radio-button>
             </t-radio-group>
-            <t-popup content="涩涩和哎呦疼等均数据敏感资源">
+            <t-tooltip content="涩涩和哎呦疼等均数据敏感资源">
               <info-circle-icon style="margin-left: 6px;" />
-            </t-popup>
+            </t-tooltip>
           </t-form-item>
 
           <t-form-item label="数据" name="data">
-            <t-input v-model="formData.data.data" placeholder="直链则输入, 文件则上传"
-              style="width: calc(100% - 112px - 12px);"></t-input>
-            <t-upload v-model="files" :size-limit="{ size: 1, unit: 'MB' }" :allow-upload-duplicate-file="true"
-              :multiple="false" :request-method="requestMethod" theme="file"
-              :style="{ marginLeft: 'var(--td-comp-margin-m)' }"></t-upload>
+            <t-input v-model="formData.data.data" placeholder="直链则输入, 文件则上传"></t-input>
+            <div clas="data-upload" :style="{ marginLeft: 'var(--td-comp-margin-s)', width: '112px' }">
+              <t-upload v-if="countDown === 0" v-model="files" :size-limit="{ size: 1, unit: 'MB' }"
+                :allow-upload-duplicate-file="true" :multiple="false" :request-method="requestMethod"
+                theme="file"></t-upload>
+              <t-button v-else variant="outline" disabled :style="{ width: '100%' }">
+                {{ `${countDown}秒后可上传` }}
+              </t-button>
+            </div>
           </t-form-item>
 
-          <t-form-item label="介绍" name="desc">
-            <t-textarea v-model="formData.data.desc" placeholder="请输入介绍, 如域名、访问速度、质量、有无广告等"></t-textarea>
+          <t-form-item label="描述" name="desc">
+            <t-textarea v-model="formData.data.desc" placeholder="请输入介绍, 如来源、域名、访问速度、质量、有无广告等"></t-textarea>
           </t-form-item>
 
           <t-form-item label="扩展" name="ext">
-            <t-space direction="vertical" style="flex: 1;">
-              <t-textarea v-model="formData.data.ext" placeholder="需填写字典格式"></t-textarea>
-              <p>解析需填写{type: 0|1} 0 标识 web 1;标识 json</p>
+            <t-space direction="vertical" size="2px" style="flex: 1;">
+              <t-textarea v-model="formData.data.ext" placeholder="填写字典格式"></t-textarea>
+              <p v-for="(item, index) in DATA_EXT_INFO" :key="index" class="ext-tip">
+                {{ item.desc }}
+              </p>
             </t-space>
           </t-form-item>
 
@@ -106,7 +114,7 @@
                   <t-tag v-else-if="item.audit === -2" shape="round" theme="danger">未通过</t-tag>
                   <t-tag v-else-if="item.audit === -1" shape="round" theme="default">待审核</t-tag>
                 </span>
-                <t-link theme="primary" hover="color" style="margin-left: 16px"
+                <t-link v-if="item.audit === 0" theme="primary" hover="color" style="margin-left: 16px"
                   @click="handleDetail(item.id)">详情</t-link>
                 <t-link theme="primary" hover="color" style="margin-left: 16px" @click="onEdit(item)">修改</t-link>
               </span>
@@ -120,16 +128,20 @@
 
 <script setup lang="js">
 import { reactive, ref, computed, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { InfoCircleIcon } from 'tdesign-icons-vue-next';
-import _ from 'lodash';
-import { useRouter } from 'vue-router';
+import clone from 'lodash/clone';
+import throttle from 'lodash/throttle';
 
+import { useCounter } from '@/hooks';
 import { useUserStore } from '@/store';
 import { addContent, fetchContentHistory, putContent } from '@/api/content';
 import { upload } from '@/api/system';
 import { formatDate } from '@/utils/tool';
+import { info } from '@/utils/info/ext';
 
+const DATA_EXT_INFO = info;
 const FORM_RULES = {
   name: [{ required: true, message: '必填', type: 'error', trigger: 'blur' }],
   data: [{ required: true, message: '必填' }],
@@ -137,6 +149,7 @@ const FORM_RULES = {
   sensitive: [{ required: true, message: '必填' }]
 };
 
+const [countDown, handleCounter] = useCounter();
 const userStore = useUserStore();
 const router = useRouter();
 
@@ -233,19 +246,32 @@ const onReset = () => {
     };
   } else if (type === 'edit') {
     const data = { ...formData.value.raw };
-    const dataCopy = _.clone(data); // 重要
+    const dataCopy = clone(data); // 重要
     delete dataCopy.id;
     delete dataCopy.audit;
     formData.value.data = dataCopy;
   };
 }
 
-const onSubmit = async ({ validateResult, firstError }) => {
+const onSubmit = throttle(async ({ validateResult, firstError }) => {
   if (validateResult === true) {
     try {
       if (!userStore.token) {
         MessagePlugin.warning('请先登录');
         return;
+      };
+
+      if (formData.value.data.ext) {
+        try {
+          const parsedExt = JSON.parse(formData.value.data.ext);
+          if (typeof parsedExt !== 'object' || parsedExt === null) {
+            MessagePlugin.warning('扩展参数非标准JSON格式');
+            return;
+          }
+        } catch {
+          MessagePlugin.warning('扩展参数非标准JSON格式');
+          return;
+        }
       };
 
       let response;
@@ -274,13 +300,16 @@ const onSubmit = async ({ validateResult, firstError }) => {
     console.log('Validate Errors: ', firstError, validateResult);
     MessagePlugin.warning(firstError);
   }
-};
+}, 10000, {
+  leading: true, // 节流开始前，默认true
+  trailing: false // 节流结束后，默认true
+}); // 10s
 
 const onEdit = async (item) => {
   active.dialog = 'edit';
   formData.value.raw = item;
 
-  const dataCopy = _.clone(item); // 重要
+  const dataCopy = clone(item); // 重要
   delete dataCopy.id;
   delete dataCopy.audit;
 
@@ -304,6 +333,7 @@ const requestMethod = (file) => {
         MessagePlugin.success('上传成功');
         formData.value.data.data = response.data.url;
         resolve({ status: 'success', response: { url: response.data.url } });
+        handleCounter(30);
       } else {
         MessagePlugin.error('上传失败');
         resolve({ status: 'fail', error: response.msg });
@@ -349,13 +379,21 @@ const handleDetail = (id) => {
         margin: 0 0 var(--td-comp-margin-m) 0;
       }
 
-      :deep(.t-upload__dragger) {
-        width: 100%;
+      .ext-tip {
+        color: var(--td-text-color-placeholder);
+        font: var(--td-font-body-small);
+        padding: var(--td-comp-paddingTB-xxs) 0;
       }
 
-      :deep(.t-upload__single-display-text) {
-        display: none;
-      }
+      .data-upload {}
+
+      // :deep(.t-upload__dragger) {
+      //   width: 100%;
+      // }
+
+      // :deep(.t-upload__single-display-text) {
+      //   display: none;
+      // }
     }
 
     .create {
@@ -375,7 +413,6 @@ const handleDetail = (id) => {
 
         .content {
           color: var(--td-text-color-placeholder);
-          font-weight: 400;
           font: var(--td-font-body-small);
           padding: var(--td-comp-paddingTB-xxs) 0;
         }
