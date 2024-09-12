@@ -67,7 +67,7 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { RefreshIcon } from 'tdesign-icons-vue-next';
 import { computed, onMounted, ref, reactive } from 'vue';
-import _ from 'lodash';
+import clone from 'lodash/clone';
 
 import { addFriendChain, fetchFriendChainList, delFriendChain, delBatchFriendChain, putFriendChain } from '@/api/friendchain';
 import { prefix } from '@/config/global';
@@ -192,7 +192,7 @@ const onEditDetail = (slot) => {
   const data = slot.row;
   formData.value.raw = data;
 
-  const dataCopy = _.clone(data); // 重要
+  const dataCopy = clone(data); // 重要
   delete dataCopy.id;
 
   formData.value.data = dataCopy;
@@ -268,7 +268,7 @@ const onDialogReset = () => {
     formData.value.data = { name: '', url: '', logo: '' };
   } else if (type === 'edit') {
     const data = { ...formData.value.raw };
-    const dataCopy = _.clone(data); // 重要
+    const dataCopy = clone(data); // 重要
     delete dataCopy.id;
     formData.value.data = dataCopy;
   };
