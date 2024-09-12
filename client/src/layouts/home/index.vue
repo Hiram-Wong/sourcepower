@@ -19,6 +19,10 @@ import LayoutHeader from './components/Header.vue';
 
 <style lang="less" scoped>
 .t-header {
+  z-index: 999;
+}
+
+.t-header {
   height: var(--td-comp-size-xxxl);
   display: flex;
   flex-direction: column;
