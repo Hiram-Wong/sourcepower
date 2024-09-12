@@ -3,16 +3,6 @@ import { useUserStore } from "@/store";
 
 const baseURL = "/api";
 
-// const baseURL = String(
-//   import.meta.env.DEV ? "/api" : import.meta.env.VITE_API_RELEASE_URL
-// );
-
-// const baseURL = String(
-//   import.meta.env.DEV
-//     ? `${ITE_API_DEV_URL}/api`
-//     : `${import.meta.env.VITE_API_RELEASE_URL}/api`
-// );
-
 const service = axios.create({
   baseURL,
   timeout: 1000 * 60,

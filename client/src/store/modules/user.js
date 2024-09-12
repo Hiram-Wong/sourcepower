@@ -46,7 +46,6 @@ export const useUserStore = defineStore("user", {
         this.userInfo = res.data.user;
 
         const permissionStore = usePermissionStore();
-        console.log(2)
         permissionStore.initRoutes(this.userInfo.roles);
       } else {
         throw res;
@@ -83,7 +82,7 @@ export const useUserStore = defineStore("user", {
         //     roles: ["UserIndex", "DashboardBase", "login"],
         //   };
       };
-      console.log(this.token);
+
       let res = await mockRemoteUserInfo(this.token);
 
       if (res.code === 0) {
