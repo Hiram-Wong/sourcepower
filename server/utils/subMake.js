@@ -1,16 +1,9 @@
-const { knex } = require("./common");
-const fs = require("fs");
-const path = require("path");
+/**
+ * 注入参数
+ * dataList 数据
+**/
 
-const dbList = async (type = "all") => {
-  let query = knex("t_content").where("audit", 0);
-  if (type !== "all") {
-    query.where("sensitive", type === "sensitive" ? true : false);
-  }
-  console.log(query)
-
-  const dataList = await query.orderBy("id", "desc");
-
+const dbList = (dataList) => {
   let data = {
     wallpaper: "https://tuapi.eees.cc/api.php?category=fengjing&type=302",
     homepage: "https://zysub.catni.cn",
@@ -46,7 +39,12 @@ const dbList = async (type = "all") => {
       },
     ],
   };
-  let js_api = "./drpy_libs/drpy2.min.js";
+
+  let js_api = (type) => {
+    if (type === 0) return "./drpy_libs/drpy2.min.js";
+    else if (type === 1) return "csp_XBPQ";
+  };
+
   let parse_flag = [
     "qiyi",
     "imgo",
@@ -70,25 +68,24 @@ const dbList = async (type = "all") => {
     "风行",
   ];
   dataList.forEach((item) => {
+    const ext = item.ext ? JSON.parse(item.ext) : {};
+
     if (item.type === "site") {
       data.sites.push({
         key: item.name,
         name: item.name,
         type: 3,
-        api: js_api,
+        api: ext?.type ? js_api(ext.type) : js_api(0),
         searchable: 1,
         quickSearch: 1,
         filterable: 1,
         ext: item.data,
       });
     } else if (item.type === "parse") {
-      const ext = item.ext;
-      let type = 0;
-      if (ext.type) type = ext.type;
       data.parses.push({
         name: item.name,
         url: item.data,
-        type: type,
+        type: ext?.type ? ext.type : 0,
         ext: {
           flag: parse_flag,
         },
@@ -108,16 +105,6 @@ const dbList = async (type = "all") => {
 };
 
 async function main() {
-  const BASE_PATH = path.join(
-    __dirname,
-    "../public/subscribe/"
-  );
-
-  ["all", "sensitive" , "nosensitive"].forEach(async(item) => {
-    const data = await dbList(item);
-    const data_to_str = JSON.stringify(data);
-    fs.writeFileSync(path.join(BASE_PATH, `./${item}.json`), data_to_str, "utf-8");
-  })
+  const data = dbList(dataList);
+  return data;
 }
-
-module.exports = main;

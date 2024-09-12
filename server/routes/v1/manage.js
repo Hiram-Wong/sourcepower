@@ -2,10 +2,9 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 
-const { knex, upload, userFileUpload } = require("../../utils/common");
+const { knex } = require("../../utils/common");
 const { authenticateJWT, authorizeRole } = require("../../utils/middleware");
-const { readFile, updateFile, unzipFile } = require("../../utils/tool");
-const subMake = require("../../utils/subMake");
+const { isFile, readFile, updateFile } = require("../../utils/tool");
 
 const router = express.Router();
 
@@ -15,7 +14,30 @@ router.get(
   authorizeRole("admin"),
   async (req, res) => {
     try {
-      await subMake();
+      const logicPath = path.join(__dirname, "../../utils/subMake.js");
+
+      if (isFile(logicPath)) {
+        const content = await readFile(logicPath);
+        const func = new Function("dataList", `${content}\n return main;`);
+
+        ["all", "sensitive", "nosensitive"].forEach(async (item) => {
+          let query = knex("t_content").where("audit", 0);
+          if (item !== "all") {
+            query.where("sensitive", item === "sensitive" ? true : false);
+          }
+
+          const dataList = await query.orderBy("id", "desc");
+
+          const response = await func(dataList)();
+          const data_to_str = JSON.stringify(response);
+
+          fs.writeFileSync(
+            path.join(__dirname, `../../public/subscribe/${item}.json`),
+            data_to_str,
+            "utf-8"
+          );
+        });
+      }
 
       res.json({
         code: 0,
@@ -49,44 +71,41 @@ router.get(
   }
 );
 
-router.get(
-  "/migration",
-  async (req, res) => {
-    try {
-      // 遍历目录
-      const directoryPath = path.join(
-        __dirname,
-        "../../public/subscribe/drpy_dzlive/drpy_js/"
-      );
+router.get("/migration", async (req, res) => {
+  try {
+    // 遍历目录
+    const directoryPath = path.join(
+      __dirname,
+      "../../public/subscribe/drpy_dzlive/drpy_js/"
+    );
 
-      fs.readdir(directoryPath, (err, files) => {
-        if (err) {
-          console.error("Error reading directory", err);
-          return;
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        console.error("Error reading directory", err);
+        return;
+      }
+
+      files.forEach(async (file) => {
+        if (path.extname(file) === ".js") {
+          await knex("t_content").insert({
+            name: path.parse(file).name,
+            type: "site",
+            sensitive: file.includes("密") ? true : false,
+            data: `./${file}`,
+            desc: "",
+            audit: 0,
+            ext: "",
+            created_at: new Date(),
+            updated_at: new Date(),
+          });
         }
-
-        files.forEach(async(file) => {
-          if (path.extname(file) === ".js") {
-            await knex("t_content").insert({
-              name: path.parse(file).name,
-              type: 'site',
-              sensitive: file.includes("密") ? true : false,
-              data: `./${file}`,
-              desc: '',
-              audit: 0,
-              ext: '',
-              created_at: new Date(),
-              updated_at: new Date(),
-            });
-          }
-        });
       });
-      res.json({ code: 0, msg: 'ok', data: null });
-    } catch (err) {
-      res.json({ code: -1, msg: err.message, data: null });
-    }
+    });
+    res.json({ code: 0, msg: "ok", data: null });
+  } catch (err) {
+    res.json({ code: -1, msg: err.message, data: null });
   }
-);
+});
 
 router.put(
   "/main",

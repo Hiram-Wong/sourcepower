@@ -1,6 +1,5 @@
 const { unzip } = require("qiao-zip");
 const fs = require("fs");
-const path = require("path");
 const crypto = require("crypto");
 
 const unzipFile = async (zipPath, extractPath, folderPath) => {
@@ -12,16 +11,39 @@ const unzipFile = async (zipPath, extractPath, folderPath) => {
   }
 };
 
+const existPath = (filePath) => {
+  const fileExists = fs.existsSync(filePath);
+  if (!fileExists) {
+    return false;
+  } return true;
+};
+
 const readFile = (filePath) => {
   try {
-    const fileExists = fs.existsSync(filePath);
-    if (!fileExists) {
+    const fileExist = existPath(filePath);
+    if (!fileExist) {
       throw new Error("File does not exist");
     }
 
     const content = fs.readFileSync(filePath, "utf8");
 
     return content;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+const isFile = (filePath) => {
+  try {
+    const fileExist = existPath(filePath);
+    if (!fileExist) {
+      throw new Error("File does not exist");
+    }
+
+    const res = fs.statSync(filePath);
+
+    return res.isFile();
   } catch (err) {
     console.log(err);
     throw err;
@@ -58,6 +80,7 @@ const cySign = (key, imgUrl, nickname, profileUrl, isvUserId) => {
 module.exports = {
   cySign,
   readFile,
+  isFile,
   updateFile,
   unzipFile,
 };
