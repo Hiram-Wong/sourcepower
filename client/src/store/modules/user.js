@@ -105,6 +105,6 @@ export const useUserStore = defineStore("user", {
       }
     },
     key: "user",
-    pick: ["token", "userInfo"],
+    paths: ["token", "userInfo"],
   },
 });
