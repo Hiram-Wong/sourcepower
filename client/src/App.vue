@@ -9,7 +9,9 @@ import { useSettingStore } from '@/store';
 const store = useSettingStore();
 
 const mode = computed(() => {
-  return store.displayMode;
+  const theme = store.displayMode;
+  store.changeMode(theme);
+  return theme;
 });
 </script>
 

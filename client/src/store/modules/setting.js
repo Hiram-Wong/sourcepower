@@ -67,7 +67,8 @@ export const useSettingStore = defineStore("setting", {
     },
   },
   persist: {
-    pick: [...keys(STYLE_CONFIG)],
+    key: "setting",
+    paths: [...keys(STYLE_CONFIG)],
   },
 });
 
