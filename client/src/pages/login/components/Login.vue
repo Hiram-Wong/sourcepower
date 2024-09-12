@@ -23,8 +23,8 @@
 
     <t-form-item class="verification-code" name="verifyCode" v-if="type === 'retrieve'">
       <t-input v-model="formData.verifyCode" size="large" placeholder="请输入验证码" />
-      <t-button variant="outline" @click="sendMailCode">
-        发送验证码
+      <t-button variant="outline" :disabled="countDown > 0" @click="sendCode">
+        {{ countDown == 0 ? '发送验证码' : `${countDown}秒后可重发` }}
       </t-button>
     </t-form-item>
 
@@ -45,7 +45,9 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { apiForgetPassword, apiSendMail } from '@/api/user';
 import { useUserStore } from '@/store';
+import { useCounter } from '@/hooks';
 
+const [countDown, handleCounter] = useCounter();
 const userStore = useUserStore();
 
 const INITIAL_DATA = {
@@ -71,13 +73,19 @@ const showPsw = ref(false);
 const router = useRouter();
 const route = useRoute();
 
-const sendMailCode = async () => {
+const sendCode = async () => {
   const { email } = formData.value;
+
+  if (!email) {
+    MessagePlugin.info('请先输入邮箱地址');
+    return;
+  };
 
   const response = await apiSendMail({ email });
 
   if (response.code === 0) {
     MessagePlugin.success('验证码发送成功, 有效期5分钟!');
+    handleCounter();
   } else {
     MessagePlugin.error(response.msg);
   };

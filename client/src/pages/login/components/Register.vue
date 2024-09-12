@@ -31,8 +31,8 @@
 
     <t-form-item class="verification-code" name="verifyCode">
       <t-input v-model="formData.verifyCode" size="large" placeholder="请输入验证码" />
-      <t-button variant="outline" @click="sendMailCode">
-        发送验证码
+      <t-button variant="outline" :disabled="countDown > 0" @click="sendCode">
+        {{ countDown == 0 ? '发送验证码' : `${countDown}秒后可重发` }}
       </t-button>
     </t-form-item>
 
@@ -50,6 +50,7 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref } from 'vue';
 
+import { useCounter } from '@/hooks';
 import { apiSendMail, apiRegister } from '@/api/user';
 
 const INITIAL_DATA = {
@@ -70,6 +71,7 @@ const FORM_RULES = {
   verifyCode: [{ required: true, message: '验证码必填', type: 'error' }],
 };
 
+const [countDown, handleCounter] = useCounter();
 const form = ref();
 const formData = ref({ ...INITIAL_DATA });
 
@@ -78,13 +80,19 @@ const showPsw = ref(false);
 
 const emit = defineEmits(['registerSuccess']);
 
-const sendMailCode = async () => {
+const sendCode = async () => {
   const { email } = formData.value;
+
+  if (!email) {
+    MessagePlugin.info('请先输入邮箱地址');
+    return;
+  };
 
   const response = await apiSendMail({ email });
 
   if (response.code === 0) {
     MessagePlugin.success('验证码发送成功, 有效期5分钟!');
+    handleCounter();
   } else {
     MessagePlugin.error(response.msg);
   };
