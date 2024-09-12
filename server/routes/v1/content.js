@@ -8,14 +8,7 @@ const { authenticateJWT, authorizeRole } = require("../../utils/middleware");
 const router = express.Router();
 
 router.get("/all", async (req, res) => {
-  const {
-    page = 1,
-    limit = 12,
-    creator,
-    keyword,
-    sensitive,
-    type,
-  } = req.query;
+  const { page = 1, limit = 12, creator, keyword, sensitive, type } = req.query;
   const offset = (page - 1) * limit;
 
   try {
@@ -43,10 +36,10 @@ router.get("/all", async (req, res) => {
     query = query.where("audit", 0);
     queryTotal = queryTotal.where("audit", 0);
 
-      console.log(typeof creator,creator)
-      if (creator) {
-      query = query.where({user_id: creator});
-      queryTotal = queryTotal.where({user_id: creator});
+    console.log(typeof creator, creator);
+    if (creator) {
+      query = query.where({ user_id: creator });
+      queryTotal = queryTotal.where({ user_id: creator });
     }
 
     if (keyword) {
@@ -55,8 +48,12 @@ router.get("/all", async (req, res) => {
     }
 
     if (sensitive) {
-      query = query.where({ sensitive: sensitive === "sensitive" ? true : false });
-      queryTotal = queryTotal.where({ sensitive: sensitive === "sensitive" ? true : false });
+      query = query.where({
+        sensitive: sensitive === "sensitive" ? true : false,
+      });
+      queryTotal = queryTotal.where({
+        sensitive: sensitive === "sensitive" ? true : false,
+      });
     }
 
     if (type) {
@@ -86,7 +83,12 @@ router.get("/all", async (req, res) => {
 router.get("/rank", async (req, res) => {
   try {
     let list = await knex("t_content")
-      .select("t_user.id", "t_user.username", "t_user.email", knex.raw("count(*) as count"))
+      .select(
+        "t_user.id",
+        "t_user.username",
+        "t_user.email",
+        knex.raw("count(*) as count")
+      )
       .where("t_content.audit", 0)
       .leftJoin("t_user", "t_content.user_id", "t_user.id")
       .groupBy("t_user.id")
@@ -173,15 +175,7 @@ router.get("/history", authenticateJWT, async (req, res) => {
 });
 
 router.post("/", authenticateJWT, async (req, res) => {
-  const {
-    name = "",
-    type = "",
-    sensitive = false,
-    data = "",
-    desc = "",
-    audit = -1,
-    ext = "",
-  } = req.body;
+  const { name, type, sensitive, data, desc, audit = -1, ext } = req.body;
 
   try {
     const response = await knex("t_content")
@@ -266,7 +260,7 @@ router.delete(
 
 router.put("/:id", authenticateJWT, async (req, res) => {
   const { id } = req.params;
-  const { name, type, sensitive, data, desc, audit = -1, ext = {} } = req.body;
+  const { name, type, sensitive, data, desc, audit = -1, ext } = req.body;
 
   try {
     const existData = await knex("t_content").where({ id }).select();
@@ -421,9 +415,9 @@ router.get("/", authenticateJWT, authorizeRole("admin"), async (req, res) => {
     let queryTotal = knex("t_content").count("* as total");
 
     if (creator) {
-      console.log(typeof creator,creator)
-      query = query.where({"user_id": parseInt(creator)});
-      queryTotal = queryTotal.where({"user_id": parseInt(creator)});
+      console.log(typeof creator, creator);
+      query = query.where({ user_id: parseInt(creator) });
+      queryTotal = queryTotal.where({ user_id: parseInt(creator) });
     }
 
     if (keyword) {
@@ -442,8 +436,12 @@ router.get("/", authenticateJWT, authorizeRole("admin"), async (req, res) => {
     }
 
     if (sensitive) {
-      query = query.where({ sensitive: sensitive === "sensitive" ? true : false });
-      queryTotal = queryTotal.where({ sensitive: sensitive === "sensitive" ? true : false });
+      query = query.where({
+        sensitive: sensitive === "sensitive" ? true : false,
+      });
+      queryTotal = queryTotal.where({
+        sensitive: sensitive === "sensitive" ? true : false,
+      });
     }
 
     query = query.limit(limit).offset(offset);
