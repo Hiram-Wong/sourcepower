@@ -1,5 +1,5 @@
 <template>
-  <t-layout class="t-layout">
+  <t-layout>
     <t-header class="t-header">
       <layout-header />
     </t-header>
@@ -18,24 +18,21 @@ import LayoutHeader from './components/Header.vue';
 </script>
 
 <style lang="less" scoped>
-.t-layout {
-  background-color: var(--td-bg-color-secondarycontainer);
-  min-height: 100vh;
-}
-
 .t-header {
   height: var(--td-comp-size-xxxl);
-  position: relative;
-  z-index: 99;
-  -webkit-box-shadow: 0 2px 16px rgba(54, 56, 79, .06);
-  box-shadow: 0 2px 16px rgba(54, 56, 79, .06);
-}
-
-.t-content {
-  position: relative;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: calc(100vh - var(--td-comp-size-xxxl));
-  overflow: auto;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0px;
+  left: auto;
+  right: 0px;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  box-shadow: none;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 </style>

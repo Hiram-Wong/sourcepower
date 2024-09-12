@@ -1,7 +1,7 @@
 <template>
   <div class="source view-container">
     <div class="content">
-      <t-card title="数据漩涡" :bordered="false" class="card-item">
+      <t-card title="数据漩涡" :bordered="false" class="card-item t-card-tag">
         <t-form :data="filterFormData" :label-width="50" @submit="onSubmit" @reset="onReset" class="header-operation">
           <t-row :gutter="[16, 16]">
             <t-col :xs="12" :sm="4">
@@ -92,7 +92,7 @@
         </div>
       </t-card>
 
-      <t-card title="创作榜单" :bordered="false" class="card-item" v-if="rankList.length > 0">
+      <t-card title="创作榜单" :bordered="false" class="card-item t-card-tag" v-if="rankList.length > 0">
         <t-list stripe>
           <t-list-item>
             <div class="list-card-rank-item rank-header">
@@ -256,6 +256,14 @@ const handleDetail = (id) => {
         :deep(.t-card__header) {
           padding: var(--td-comp-paddingTB-l) var(--td-comp-paddingLR-xl) 0;
           display: block;
+
+          &::before {
+            display: none;
+          }
+
+          &::after {
+            display: none;
+          }
         }
 
         :deep(.t-card__header-wrapper) {

@@ -1,7 +1,7 @@
 <template>
   <div class="home view-container">
     <div class="content">
-      <t-card title="可持续源" :bordered="false" class="card-item">
+      <t-card title="可持续源" :bordered="false" class="card-item t-card-tag">
         <div class="soico"></div>
         <p class="tip">订阅一下 · 即刻观看</p>
         <div class="sub-box">
@@ -20,7 +20,7 @@
           </t-button>
         </div>
       </t-card>
-      <t-card title="注意事项" :bordered="false" class="card-item">
+      <t-card title="注意事项" :bordered="false" class="card-item t-card-tag">
         <t-collapse class="collapse">
           <t-collapse-panel destroy-on-collapse header="授权地址">
             <p>1.当前请求地址: {{ subscribeForm.ip ? subscribeForm.ip : '未知' }}</p>
@@ -41,7 +41,7 @@
           </t-collapse-panel>
         </t-collapse>
       </t-card>
-      <t-card title="友情链接" :bordered="false" class="card-item">
+      <t-card title="友情链接" :bordered="false" class="card-item t-card-tag">
         <div v-if="friendChainList.length === 0">空空如也</div>
         <div v-else>
           <t-space break-line size="small">
@@ -202,13 +202,23 @@ const onClickConfirm = () => {
       }
 
       .sub-box {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-transition: all 0.3s;
+        transition: all 0.3s;
+        width: 100%;
+
         background-color: var(--td-bg-color-secondarycontainer);
         border-radius: var(--td-radius-medium);
         padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-l);
-        overflow: hidden;
         display: flex;
         align-items: center;
-        justify-content: space-between;
 
         :deep(.t-input--suffix) {
           border-radius: var(--td-radius-medium);
@@ -233,6 +243,7 @@ const onClickConfirm = () => {
         }
 
         .search_button {
+          min-width: 60px;
           width: 60px;
         }
       }

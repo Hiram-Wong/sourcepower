@@ -5,6 +5,11 @@
         <template #logo>
           <img class="logo" src="@/assets/logo.png" alt="logo" @click="logoHandle('index')">
         </template>
+
+        <t-menu-item v-for="(item, index) in MENU_LIST" :key="index" :value="item.value">
+          {{ item.label }}
+        </t-menu-item>
+
         <template #operations>
           <div class="t-nav">
             <div class="t-menu-prefix">
@@ -13,8 +18,8 @@
                 <menu-fold-icon v-if="isVisible.menu" />
                 <menu-unfold-icon v-else />
               </t-button>
-              <t-drawer v-model:visible="isVisible.menu" attach=".header" :header="false" :footer="false"
-                :showOverlay="false" placement="top" show-in-attached-element size="auto">
+              <t-drawer v-model:visible="isVisible.menu" attach="body" :footer="false" placement="left"
+                class="mobile-sidebar">
                 <ul class="t-menu-custom mobile-menu">
                   <t-menu-item v-for="(item, index) in MENU_LIST" :key="index" :value="item.value"
                     @click="isVisible.menu = false">
@@ -26,10 +31,6 @@
                 </ul>
               </t-drawer>
             </div>
-            <ul class="t-menu-custom">
-              <t-menu-item v-for="(item, index) in MENU_LIST" :key="index" :value="item.value">{{ item.label
-                }}</t-menu-item>
-            </ul>
           </div>
           <t-dropdown :min-column-width="120" trigger="click">
             <template #dropdown>
@@ -204,6 +205,14 @@ const handleLogout = () => {
     .header-user-btn {
       margin-left: var(--td-comp-margin-xxs);
       padding: 0 var(--td-comp-paddingLR-s);
+    }
+
+    :deep(ul.t-menu) {
+      display: none;
+    }
+
+    :deep(.t-head-menu__inner) {
+      justify-content: space-between;
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="submit-container view-container">
     <div class="content">
-      <t-card title="学习课堂" :bordered="false" class="card-item create">
+      <t-card title="学习课堂" :bordered="false" class="card-item t-card-tag create">
         <p class="title">三步学会属于你自己的创作</p>
         <div class="step-info step-item">
           <p class="use-title">
@@ -25,7 +25,8 @@
           <p class="content">跟随视频教程，逐步提升实战技能</p>
         </div>
       </t-card>
-      <t-card title="创作投递" :bordered="false" class="card-item">
+
+      <t-card title="创作投递" :bordered="false" class="card-item t-card-tag">
         <div class="tips" ref="submiteRef">
           <p class="tip">1.感谢您的支持, 提交前确保您是登录状态</p>
           <p class="tip">2.上传后即创作者授权平台拥有宣传分发权利</p>
@@ -96,7 +97,8 @@
           </t-form-item>
         </t-form>
       </t-card>
-      <t-card title="历史记录" :bordered="false" class="card-item" v-if="historyList.length > 0">
+      
+      <t-card title="历史记录" :bordered="false" class="card-item t-card-tag" v-if="historyList.length > 0">
         <t-list :async-loading="asyncLoading" split @load-more="loadMore">
           <t-list-item v-for="item in historyList" :key="item.id">
             <t-list-item-meta>

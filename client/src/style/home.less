@@ -1,3 +1,5 @@
+@import './font-family.less';
+
 .t-card {
   margin-bottom: var(--td-comp-margin-m);
 
@@ -7,5 +9,48 @@
 
   &:last-child {
     margin-bottom: 0;
+  }
+}
+
+.t-card-tag {
+  .t-card__header {
+    &::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      width: 3px;
+      height: 18px;
+      border-radius: 10px;
+      background-color: var(--td-brand-color-7);
+      opacity: 1;
+      transform: translateY(-50%) rotate(15deg);
+      transition: all 0.4s ease-in-out;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      width: 3px;
+      height: 16px;
+      border-radius: 10px;
+      background-color: var(--td-brand-color-4);
+      opacity: 0.6;
+      transform: translateY(-50%) rotate(15deg);
+      transition: all 0.4s ease-in-out;
+    }
+  }
+}
+
+.mobile-sidebar {
+  .mobile-menu {
+    .t-menu__item {
+      margin-bottom: var(--td-comp-margin-xs);
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }

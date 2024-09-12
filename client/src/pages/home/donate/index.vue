@@ -1,7 +1,7 @@
 <template>
   <div class="about-container view-container">
     <div class="content">
-      <t-card title="捐助列表" :bordered="false" class="card-item">
+      <t-card title="捐助列表" :bordered="false" class="card-item t-card-tag">
         <p style="text-align: center;">
           <span>捐赠为自愿行为, 不构成合同关系</span>
         </p>

@@ -3,7 +3,7 @@
     <div class="content">
       <t-alert theme="info" message="请勿相信数据源中任何广告!" close class="alert-item" />
       <t-alert v-if="detailData.sensitive" theme="error" message="当前敏感数据, 注意周围环境并调低音量!" close class="alert-item" />
-      <t-card title="简介信息" :bordered="false" class="card-item">
+      <t-card title="简介信息" :bordered="false" class="card-item t-card-tag">
         <p class="title">{{ detailData.name }}</p>
         <p class="time">
           <span class="push">发布于 {{ formatDate(detailData.created_at) }}</span>
@@ -28,7 +28,7 @@
         </div>
       </t-card>
 
-      <t-card title="一键导入" :bordered="false" class="card-item detail-import">
+      <t-card title="一键导入" :bordered="false" class="card-item t-card-tag detail-import">
         <t-space size="small">
           <t-popconfirm content="请确认zyplayer软件处于打开状态" @confirm="onShareZyplayer">
             <t-button variant="dashed">zyplayer</t-button>
@@ -37,7 +37,7 @@
         </t-space>
       </t-card>
 
-      <t-card title="数据内容" :bordered="false" class="card-item detail-content">
+      <t-card title="数据内容" :bordered="false" class="card-item t-card-tag detail-content">
         <t-watermark :watermark-content="{
           text: '源动力',
         }" :width="120" :height="60" :y="30" :x="60" class="detail-watermark">
@@ -72,15 +72,52 @@
         </t-watermark>
       </t-card>
 
-      <!-- <t-card title="探讨交流" :bordered="false" class="card-item detail-content">
+      <t-card title="探讨交流" :bordered="false" class="card-item t-card-tag detail-comments">
+        <t-comment avatar="https://tdesign.gtimg.com/site/avatar.jpg">
+          <template #content>
+            <div class="comment-box">
+              <t-textarea v-model="replyData" placeholder="请输入内容" :autosize="{ minRows: 3, maxRows: 5 }" />
+              <div class="action-box">
+                <div class="u-emoji"></div>
+                <t-button class="btn-box" @click="submitReply">发表评论</t-button>
+              </div>
+            </div>
+          </template>
+        </t-comment>
 
-      </t-card> -->
+        <template v-for="item in comments">
+          <t-comment :avatar="item.user.avatar" :author="item.user.username" :datetime="item.createTime"
+            :content="item.content" class="comment-reply">
+            <template #actions>
+              <t-space key="chat" :size="6">
+                <t-icon name="chat" />
+                <span>回复</span>
+              </t-space>
+            </template>
+
+            <template #reply>
+              <template v-for="reply in item.reply.list" v-if="item?.reply">
+                <t-comment :author="reply.user.username" :datetime="reply.createTime" :content="reply.content">
+
+                  <template #actions>
+
+                    <t-space key="chat" :size="6">
+                      <t-icon name="chat" />
+                      <span>回复</span>
+                    </t-space>
+                  </template>
+                </t-comment>
+              </template>
+            </template>
+          </t-comment>
+        </template>
+      </t-card>
     </div>
   </div>
 </template>
 
 <script lang="js" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { LinkIcon, InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
@@ -98,6 +135,109 @@ const route = useRoute();
 
 const id = computed(() => route.params.id);
 const detailData = ref({});
+
+const comments = [
+  {
+    id: '1',
+    parentId: null,
+    uid: '2',
+    content: '床前明月光，疑是地上霜。<br>举头望明月，低头思故乡。<img class="a" id="a" style="width: 50px" src=a onerror="window.location.href=\'https://baidu.com\'">',
+    createTime: new Date().toLocaleDateString(),
+    user: {
+      username: '李白 [唐代]',
+      avatar: 'https://static.juzicon.com/images/image-231107185110-DFSX.png',
+      homeLink: '/1'
+    },
+    reply: {
+      total: 1,
+      list: [
+        {
+          id: '11',
+          parentId: 1,
+          uid: '1',
+          content: '[狗头][微笑2]',
+          createTime: new Date().toLocaleDateString(),
+          user: {
+            username: '杜甫 [唐代]',
+            avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
+          }
+        },
+        {
+          id: '11',
+          parentId: 1,
+          uid: '1',
+          content: '[狗头][微笑2]',
+          createTime: new Date().toLocaleDateString(),
+          user: {
+            username: '杜甫 [唐代]',
+            avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: '2',
+    parentId: null,
+    uid: '3',
+    content: '国破山河在，城春草木深。<br>感时花溅泪，恨别鸟惊心。<br>烽火连三月，家书抵万金。<br>白头搔更短，浑欲不胜簪。',
+    createTime: new Date(),
+    user: {
+      username: '杜甫 [唐代]',
+      avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg'
+    }
+  },
+  {
+    id: '3',
+    parentId: null,
+    uid: '2',
+    content: '日照香炉生紫烟，遥看瀑布挂前川。<br>飞流直下三千尺，疑是银河落九天。',
+    likes: 34116,
+    createTime: new Date(),
+    user: {
+      username: '李白 [唐代]',
+      avatar: 'https://static.juzicon.com/images/image-231107185110-DFSX.png',
+      homeLink: '/1'
+    }
+  }
+]
+
+// 模拟请求接口获取评论数据
+setTimeout(() => {
+  // 当前登录用户数据
+  config.user = {
+    id: 1,
+    username: '杜甫 [唐代]',
+    avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
+  }
+  config.comments = comments
+}, 500)
+
+// 评论提交事件
+let temp_id = 100
+// 提交评论事件
+const submit = ({ content, parentId, finish }) => {
+  let str = '提交评论:' + content + ';\t父id: ' + parentId
+  console.log(str)
+
+  // 模拟请求接口生成数据
+  const comment = {
+    id: String((temp_id += 1)),
+    parentId: parentId,
+    uid: config.user.id,
+    content: content,
+    createTime: new Date().toString(),
+    user: {
+      username: config.user.username,
+      avatar: config.user.avatar
+    },
+    reply: null
+  }
+  setTimeout(() => {
+    finish(comment)
+    UToast({ message: '评论成功!', type: 'info' })
+  }, 200)
+}
 
 onMounted(() => {
   fetchData(id.value)
@@ -343,6 +483,57 @@ const onShareZyplayer = async () => {
           border-radius: var(--td-radius-medium);
           border-width: 2px;
           z-index: 998;
+        }
+      }
+    }
+
+    .detail-comments {
+      .comment-box {
+        .action-box {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: var(--td-comp-margin-s);
+        }
+      }
+
+      :deep(.t-comment) {
+        padding: var(--td-comp-paddingTB-m) 0;
+
+        .t-comment__inner {
+
+          .t-comment__avatar {
+            margin-right: var(--td-comp-margin-l);
+          }
+
+          .t-comment__avatar-image {
+            width: var(--td-comp-size-l);
+            height: var(--td-comp-size-l);
+          }
+
+          .t-comment__content {
+
+            .t-comment__author {
+              .t-comment__name {
+                font: var(--td-font-title-small);
+                max-width: 300px;
+              }
+            }
+
+            .t-comment__actions {
+              align-items: center;
+              justify-content: flex-start;
+              flex-direction: row;
+
+              :first-child {
+                margin-left: -2px;
+              }
+            }
+          }
+        }
+
+        .t-comment__reply {
+          margin-left: var(--td-comp-size-xxl);
         }
       }
     }

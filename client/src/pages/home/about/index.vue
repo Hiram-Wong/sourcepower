@@ -1,7 +1,7 @@
 <template>
   <div class="about-container view-container">
     <div class="content">
-      <t-card title="关于本站" :bordered="false" class="card-item">
+      <t-card title="关于本站" :bordered="false" class="card-item t-card-tag">
         <h2 style="margin-top: 0;">Intro | 简介</h2>
         <p>
           「源动力」是一个爱好者的聚集地，最初因为没有统一的网站收集这部分信息，在一些支持者的支持下成立该平台，并将数据件挂在网站上供大家使用，一个月之内便聚集了上百万次访问。
