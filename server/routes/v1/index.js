@@ -1,6 +1,7 @@
 const express = require("express");
 
 const content = require("./content");
+const comment = require("./comment");
 const friendchain = require("./friendchain");
 const manage = require("./manage");
 const user = require("./user");
@@ -10,6 +11,7 @@ const system = require("./system");
 const router = express.Router();
 
 router.use("/content", content);
+router.use("/comment", comment);
 router.use("/manage", manage);
 router.use("/user", user);
 router.use("/subscribe", subscribe);
