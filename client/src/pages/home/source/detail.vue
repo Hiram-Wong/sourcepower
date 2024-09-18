@@ -73,44 +73,81 @@
       </t-card>
 
       <t-card title="探讨交流" :bordered="false" class="card-item t-card-tag detail-comments">
-        <t-comment avatar="https://tdesign.gtimg.com/site/avatar.jpg">
+        <t-comment :avatar="formatAvatar(userStore.email)" v-if="!active.replyDialog">
           <template #content>
-            <div class="comment-box">
-              <t-textarea v-model="replyData" placeholder="请输入内容" :autosize="{ minRows: 3, maxRows: 5 }" />
-              <div class="action-box">
-                <div class="u-emoji"></div>
-                <t-button class="btn-box" @click="submitReply">发表评论</t-button>
-              </div>
-            </div>
+            <submit-view v-model="commentFormData.content" @submit="onSubmitComment" />
           </template>
         </t-comment>
 
-        <template v-for="item in comments">
-          <t-comment :avatar="item.user.avatar" :author="item.user.username" :datetime="item.createTime"
-            :content="item.content" class="comment-reply">
+        <template v-for="item in commentData" :key="item.comment_id">
+          <t-comment :avatar="formatAvatar(item.user.email)" :author="item.user.username"
+            :datetime="formatDate(item.created_at)" class="comment-reply">
+            <template #content>
+              <div v-html="md.render(item.compiled_content)" class="chat-msg-content pa-3"></div>
+            </template>
             <template #actions>
-              <t-space key="chat" :size="6">
-                <t-icon name="chat" />
+              <t-space key="chat" :size="6" @click="onSubmitCommentDialog(item.comment_id)">
+                <chat-icon />
                 <span>回复</span>
+              </t-space>
+              <t-space key="delete" :size="6" v-if="item.user.id === userStore.userInfo.id"
+                @click="onDelComment(item.comment_id)">
+                <delete-icon />
+                <span>删除</span>
               </t-space>
             </template>
 
             <template #reply>
-              <template v-for="reply in item.reply.list" v-if="item?.reply">
-                <t-comment :author="reply.user.username" :datetime="reply.createTime" :content="reply.content">
-
+              <template v-for="reply in item.reply" v-if="item.reply_count !== 0">
+                <t-comment :author="reply.user.username" :datetime="formatDate(reply.created_at)">
+                  <template #author>
+                    <span>{{ reply.user.username }}</span>
+                    <span v-if="reply.to?.id">
+                      <span style="margin: 0 2px; color: var(--td-text-color-secondary); font-weight: 400;">回复</span>
+                      <span>{{ reply.to.username }}</span>
+                    </span>
+                  </template>
+                  <template #content>
+                    <div v-html="md.render(reply.compiled_content)" class="chat-msg-content pa-3"></div>
+                  </template>
                   <template #actions>
-
-                    <t-space key="chat" :size="6">
-                      <t-icon name="chat" />
+                    <t-space key="chat" :size="6" @click="onSubmitReplyDialog(item.comment_id, reply.user)">
+                      <chat-icon />
                       <span>回复</span>
+                    </t-space>
+                    <t-space key="delete" :size="6" v-if="reply.user.id === userStore.userInfo.id"
+                      @click="onDelReply(item.comment_id, reply.reply_id)">
+                      <delete-icon />
+                      <span>删除</span>
                     </t-space>
                   </template>
                 </t-comment>
               </template>
+
+              <load-view :current="item.reply.length" :total="item.reply_count"
+                @load="onLoadMoreReply(item.comment_id, item.reply.length)" v-if="item.reply_count !== 0" />
             </template>
           </t-comment>
         </template>
+
+        <div class="reply-box-sticky" v-if="active.replyDialog">
+          <submit-view v-model="commentFormData.content" @submit="onSubmitReply">
+            <template #header>
+              <div class="reply-box-header">
+                <div class="left">
+                  <span v-if="commentFormData.to.name">回复: {{ commentFormData.to.name }}</span>
+                </div>
+                <div class="right">
+                  <div class="close-btn" @click="onCloseReplyDialog">
+                    <close-icon />
+                  </div>
+                </div>
+              </div>
+            </template>
+          </submit-view>
+        </div>
+
+        <load-view :current="commentData.length" :total="pagination.total" @load="onLoadMoreComment" />
       </t-card>
     </div>
   </div>
@@ -119,129 +156,63 @@
 <script lang="js" setup>
 import { computed, onMounted, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
-import { LinkIcon, InfoCircleIcon } from 'tdesign-icons-vue-next';
+import { LinkIcon, InfoCircleIcon, CloseIcon, ChatIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
+import hljs from "highlight.js";
+import MarkdownIt from 'markdown-it';
+import mathjax3 from 'markdown-it-mathjax3';
 
+import findIndex from 'lodash/findIndex';
+
+import { useUserStore } from '@/store';
 import { fetchContentDetail } from '@/api/content';
 import { fetchSubscribeCode } from '@/api/subscribe';
-import { formatDate } from '@/utils/tool';
+import { fetchComment, fetchReply, addReply, addComment, delReply, delComment } from '@/api/comment';
+import { formatDate, formatAvatar } from '@/utils/tool';
 import { base64 } from '@/utils/encode';
 import request from '@/utils/request';
 import { info } from '@/utils/info/ext';
 
+import LoadView from '@/components/comment/load/index.vue';
+import SubmitView from '@/components/comment/submit/index.vue';
+
+const md = new MarkdownIt({
+  linkify: true,
+  highlight: function (code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return `<pre class="hljs-code-container my-3"><div class="hljs-code-header d-flex align-center justify-space-between bg-grey-darken-3 pa-1"></div><code class="hljs language-${language}">${hljs.highlight(code, { language: language, ignoreIllegals: true }).value}</code></pre>`;
+  },
+});
+md.use(mathjax3);
+
 const DATA_EXT_INFO = info;
 
 const route = useRoute();
+const userStore = useUserStore();
 
-const id = computed(() => route.params.id);
+const detailId = computed(() => route.params.id);
 const detailData = ref({});
-
-const comments = [
-  {
-    id: '1',
-    parentId: null,
-    uid: '2',
-    content: '床前明月光，疑是地上霜。<br>举头望明月，低头思故乡。<img class="a" id="a" style="width: 50px" src=a onerror="window.location.href=\'https://baidu.com\'">',
-    createTime: new Date().toLocaleDateString(),
-    user: {
-      username: '李白 [唐代]',
-      avatar: 'https://static.juzicon.com/images/image-231107185110-DFSX.png',
-      homeLink: '/1'
-    },
-    reply: {
-      total: 1,
-      list: [
-        {
-          id: '11',
-          parentId: 1,
-          uid: '1',
-          content: '[狗头][微笑2]',
-          createTime: new Date().toLocaleDateString(),
-          user: {
-            username: '杜甫 [唐代]',
-            avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
-          }
-        },
-        {
-          id: '11',
-          parentId: 1,
-          uid: '1',
-          content: '[狗头][微笑2]',
-          createTime: new Date().toLocaleDateString(),
-          user: {
-            username: '杜甫 [唐代]',
-            avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
-          }
-        }
-      ]
-    }
-  },
-  {
-    id: '2',
-    parentId: null,
-    uid: '3',
-    content: '国破山河在，城春草木深。<br>感时花溅泪，恨别鸟惊心。<br>烽火连三月，家书抵万金。<br>白头搔更短，浑欲不胜簪。',
-    createTime: new Date(),
-    user: {
-      username: '杜甫 [唐代]',
-      avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg'
-    }
-  },
-  {
-    id: '3',
-    parentId: null,
-    uid: '2',
-    content: '日照香炉生紫烟，遥看瀑布挂前川。<br>飞流直下三千尺，疑是银河落九天。',
-    likes: 34116,
-    createTime: new Date(),
-    user: {
-      username: '李白 [唐代]',
-      avatar: 'https://static.juzicon.com/images/image-231107185110-DFSX.png',
-      homeLink: '/1'
-    }
+const commentData = ref([]);
+const pagination = ref({ current: 1, pageSize: 10, total: 0 });
+const active = reactive({
+  commentLoad: false,
+  replyDialog: false
+});
+const commentFormData = ref({
+  content: '',
+  parent_id: null,
+  to: {
+    id: null,
+    name: null
   }
-]
-
-// 模拟请求接口获取评论数据
-setTimeout(() => {
-  // 当前登录用户数据
-  config.user = {
-    id: 1,
-    username: '杜甫 [唐代]',
-    avatar: 'https://static.juzicon.com/images/image-180327173755-IELJ.jpg',
-  }
-  config.comments = comments
-}, 500)
-
-// 评论提交事件
-let temp_id = 100
-// 提交评论事件
-const submit = ({ content, parentId, finish }) => {
-  let str = '提交评论:' + content + ';\t父id: ' + parentId
-  console.log(str)
-
-  // 模拟请求接口生成数据
-  const comment = {
-    id: String((temp_id += 1)),
-    parentId: parentId,
-    uid: config.user.id,
-    content: content,
-    createTime: new Date().toString(),
-    user: {
-      username: config.user.username,
-      avatar: config.user.avatar
-    },
-    reply: null
-  }
-  setTimeout(() => {
-    finish(comment)
-    UToast({ message: '评论成功!', type: 'info' })
-  }, 200)
-}
+});
 
 onMounted(() => {
-  fetchData(id.value)
-})
+  if (userStore.token) {
+    fetchData(detailId.value);
+    fetchCommentData(detailId.value, pagination.value.current, pagination.value.pageSize);
+  };
+});
 
 const formatUrl = (str) => {
   if (str && typeof str === "string" && str.startsWith('http')) {
@@ -256,11 +227,201 @@ const fetchData = async (id) => {
     if (response.code === 0) {
       detailData.value = response.data;
     } else {
-      MessagePlugin.error(response.msg);
+      MessagePlugin.error(`fail ${response.msg}`);
     };
   } catch (err) {
-    MessagePlugin.error(err);
+    MessagePlugin.error(`fail ${err.message}`);
   }
+};
+
+const fetchCommentData = async (id, page, size) => {
+  try {
+    const response = await fetchComment({
+      id,
+      page,
+      size
+    });
+
+    if (response.code === 0) {
+      commentData.value = commentData.value.concat(response.data.list);
+
+      pagination.value.current += 1;
+      pagination.value.total = response.data.total;
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const fetchReplyData = async (id, page, size) => {
+  try {
+    const response = await fetchReply({
+      id,
+      page,
+      size
+    });
+
+    if (response.code === 0) {
+      const index = findIndex(commentData.value, { comment_id: id });
+      if (index !== -1) {
+        commentData.value[index].reply = commentData.value[index].reply.concat(response.data.list);
+      }
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const onLoadMoreComment = async () => {
+  await fetchCommentData(detailId.value, pagination.value.current, pagination.value.pageSize);
+};
+
+const onLoadMoreReply = async (id, current) => {
+  const limit = 3;
+  const page = Math.ceil((current + 1) / limit);
+  await fetchReplyData(id, page, limit);
+};
+
+const onSubmitComment = async () => {
+  try {
+    if (!userStore.token) {
+      MessagePlugin.warning('请先登录');
+      return;
+    };
+
+    if (!commentFormData.value.content.trim()) {
+      MessagePlugin.warning('请先输入内容');
+      return;
+    }
+
+    const response = await addComment({
+      content_id: detailId.value,
+      content: commentFormData.value.content
+    });
+
+    if (response.code === 0) {
+      MessagePlugin.success('发表成功');
+
+      resetCommentFormData();
+      resetCommentData();
+      fetchCommentData(detailId.value, pagination.value.current, pagination.value.pageSize);
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const onSubmitCommentDialog = async (id) => {
+  active.replyDialog = true;
+
+  commentFormData.value.parent_id = id;
+};
+
+const onSubmitReplyDialog = async (id, to) => {
+  active.replyDialog = true;
+
+  commentFormData.value.parent_id = id;
+  commentFormData.value.to.id = to.id;
+  commentFormData.value.to.name = to.username;
+};
+
+const onSubmitReply = async () => {
+  try {
+    if (!userStore.token) {
+      MessagePlugin.warning('请先登录');
+      return;
+    };
+
+    if (!commentFormData.value.content.trim()) {
+      MessagePlugin.warning('请先输入内容');
+      return;
+    }
+
+    const response = await addReply({
+      comment_id: commentFormData.value.parent_id,
+      to_id: commentFormData.value.to.id,
+      content: commentFormData.value.content
+    });
+
+    if (response.code === 0) {
+      MessagePlugin.success('提交成功');
+
+      active.replyDialog = false;
+
+      resetCommentFormData();
+      resetCommentData();
+      fetchCommentData(detailId.value, pagination.value.current, pagination.value.pageSize);
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const onDelComment = async (id) => {
+  try {
+    const response = await delComment(id);
+
+    if (response.code === 0) {
+      const index = findIndex(commentData.value, { comment_id: id });
+      if (index !== -1) {
+        commentData.value.splice(index, 1);
+      }
+
+      MessagePlugin.success('删除成功');
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const onDelReply = async (comment_id, reply_id) => {
+  try {
+    const response = await delReply(reply_id);
+
+    if (response.code === 0) {
+      const comment_index = findIndex(commentData.value, { comment_id: comment_id });
+
+      if (comment_index !== -1) {
+        const reply_index = findIndex(commentData.value[comment_index].reply, { reply_id: reply_id });
+        commentData.value[comment_index].reply_count -= 1;
+        if (reply_index !== -1) {
+          commentData.value[comment_index].reply.splice(reply_index, 1);
+        }
+      }
+      MessagePlugin.success('删除成功');
+    } else {
+      MessagePlugin.error(`fail ${response.msg}`);
+    };
+  } catch (err) {
+    MessagePlugin.error(`fail ${err.message}`);
+  }
+};
+
+const onCloseReplyDialog = () => {
+  resetCommentFormData();
+  active.replyDialog = false;
+};
+
+const resetCommentFormData = () => {
+  commentFormData.value.content = '';
+  commentFormData.value.to = { id: null, name: null };
+  commentFormData.value.parent_id = null;
+};
+
+const resetCommentData = () => {
+  pagination.value.current = 1;
+  pagination.value.total = 0;
+  commentData.value = [];
 };
 
 const onShareDrpyHiker = async () => {
@@ -327,12 +488,12 @@ const onShareZyplayer = async () => {
       const formatData = detailData.value.data.startsWith('http') ? detailData.value.data : new URL(`${BASE_API_URL}${detailData.value.data}`).href;
       const data = {
         name: detailData.value.name,
-        api: formatExt?.api ? formatExt.api : "./drpy_libs/drpy2.min.js",
+        api: formatExt?.type === 0 ? formatExt?.api ? formatExt.api : "./drpy_libs/drpy2.min.js" : "csp_XBPQ",
         playUrl: formatExt?.playUrl ? formatExt.playUrl : "",
         group: formatExt?.group ? formatExt.group : "默认",
         search: formatExt?.search ? formatExt.search : 1,
         isActive: true,
-        type: 7,
+        type: formatExt?.type === 0 ? 7: 9,
         ext: formatData,
         categories: formatExt?.categories ? formatExt.categories : "",
       }
@@ -488,6 +649,10 @@ const onShareZyplayer = async () => {
     }
 
     .detail-comments {
+      :deep(.t-card__body) {
+        position: relative;
+      }
+
       .comment-box {
         .action-box {
           display: flex;
@@ -525,9 +690,9 @@ const onShareZyplayer = async () => {
               justify-content: flex-start;
               flex-direction: row;
 
-              :first-child {
-                margin-left: -2px;
-              }
+              // :first-child {
+              //   margin-left: -2px;
+              // }
             }
           }
         }
@@ -543,5 +708,79 @@ const onShareZyplayer = async () => {
 .ext-tip {
   font: var(--td-font-body-small);
   padding: var(--td-comp-paddingTB-xxs) 0;
+}
+
+.reply-box-sticky {
+  position: sticky;
+  bottom: 20px;
+  background: var(--td-bg-color-secondarycontainer);
+  border-radius: var(--td-radius-medium);
+  outline: 2px solid var(--td-border-level-2-color);
+  padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
+  margin: 0 -10px;
+
+  .reply-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .left {
+      max-width: 200px;
+    }
+
+    .right {
+      .close-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: var(--td-comp-size-xs);
+        height: var(--td-comp-size-xs);
+        color: var(--td-text-color-primary);
+        border-radius: var(--td-radius-default);
+        cursor: pointer;
+        transition: background-color .2s;
+
+        &:hover {
+          background-color: var(--td-bg-color-container);
+        }
+      }
+    }
+  }
+
+  .reply-box-main {
+    margin-top: var(--td-comp-margin-xs);
+
+    .content {
+      border: 1px solid var(--td-border-level-2-color);
+      border-radius: var(--td-radius-default);
+
+      &:is(:focus, :focus-within) {
+        border-color: var(--td-brand-color);
+        box-shadow: 0 0 0 1px var(--td-brand-color-focus);
+      }
+
+      :deep(textarea) {
+        border-color: transparent;
+        box-shadow: none;
+      }
+    }
+
+    // :deep(textarea:focus) .content {
+    // }
+
+    .tip {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-top: 1px dashed var(--td-border-level-2-color);
+      color: var(--td-text-color-placeholder);
+    }
+  }
+
+  .reply-box-footer {
+    margin-top: var(--td-comp-margin-xs);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 </style>

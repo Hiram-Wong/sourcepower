@@ -1,4 +1,4 @@
-import { SendIcon, UserIcon, System2Icon } from "tdesign-icons-vue-next";
+import { SendIcon, UserIcon, System2Icon, ChatIcon } from "tdesign-icons-vue-next";
 import { shallowRef } from "vue";
 
 import Layout from "@/layouts/admin/index.vue";
@@ -79,6 +79,46 @@ export default [
           title: {
             zh_CN: "数据管理",
             en_US: "Data",
+          },
+          roleCode: "admin",
+        },
+      },
+    ],
+  },
+  {
+    path: "/admin/comment",
+    component: Layout,
+    redirect: "/admin/comment/info",
+    name: "comment",
+    meta: {
+      title: {
+        zh_CN: "评论管理",
+        en_US: "Comment",
+      },
+      icon: shallowRef(ChatIcon),
+      orderNo: 2,
+    },
+    children: [
+      {
+        path: "info",
+        name: "CommentInfo",
+        component: () => import("@/pages/admin/comment/info/index.vue"),
+        meta: {
+          title: {
+            zh_CN: "一级评论",
+            en_US: "FirstLevel",
+          },
+          roleCode: "admin",
+        },
+      },
+      {
+        path: "reply",
+        name: "CommentReply",
+        component: () => import("@/pages/admin/comment/reply/index.vue"),
+        meta: {
+          title: {
+            zh_CN: "二级评论",
+            en_US: "SecondaryLevel",
           },
           roleCode: "admin",
         },
