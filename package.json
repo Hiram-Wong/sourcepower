@@ -1,0 +1,30 @@
+{
+  "name": "sourcepower",
+  "private": true,
+  "version": "1.0.0",
+  "description": "source code of sub system",
+  "homepage": "https://github.com/Hiram-Wong/sourcepower",
+  "license": "MIT",
+  "author": "hiram@catni.cn",
+  "repository": "github:Hiram-Wong/sourcepower",
+  "engines": {
+    "node": ">= 18"
+  },
+  "packageManager": "pnpm@8.6.12",
+  "scripts": {
+    "install": "turbo run post-install --parallel --no-cache",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,tsx,mjs,js,jsx,md,css}\""
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^9.10.0",
+    "prettier": "^3.3.3",
+    "turbo": "^1.11.2",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+  }
+}

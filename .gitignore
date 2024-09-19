@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+.turbo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -24,5 +26,7 @@ dist-ssr
 *.sw?
 
 # server
-server/public/*
-server/.env
+packages/server/public/*
+packages/server/.env
+
+# web
