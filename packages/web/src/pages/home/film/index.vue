@@ -34,29 +34,26 @@
           <t-tabs v-model="active.tab">
             <t-tab-panel value="search" label="搜索结果">
               <div class="panel-content">
-                <template v-if="table.length > 0">
-                  <t-table
-                    row-key="index"
-                    :data="table"
-                    :columns="COLUMNS"
-                    :pagination="pagination"
-                    :loading="active.tableLoading"
-                    @change="onCurrentChange"
-                  >
-                    <template #op="slotProps">
-                      <t-space>
-                        <t-link theme="primary" @click="handleDetail(slotProps.row.vod_id)">查看</t-link>
-                      </t-space>
-                    </template>
-                  </t-table>
-                  <t-divider />
-                  <p>
-                    <span>数据由</span>
-                    <t-link theme="primary" href="https://huaweiba.live/">华为吧</t-link>
-                    <span>提供</span>
-                  </p>
-                </template>
-                <t-empty v-else />
+                <t-table
+                  row-key="index"
+                  :data="table"
+                  :columns="COLUMNS"
+                  :pagination="pagination"
+                  :loading="active.tableLoading"
+                  @change="onCurrentChange"
+                >
+                  <template #op="slotProps">
+                    <t-space>
+                      <t-link theme="primary" @click="handleDetail(slotProps.row.vod_id)">查看</t-link>
+                    </t-space>
+                  </template>
+                </t-table>
+                <t-divider />
+                <p>
+                  <span>数据由</span>
+                  <t-link theme="primary" href="https://huaweiba.live/">华为吧</t-link>
+                  <span>提供</span>
+                </p>
               </div>
             </t-tab-panel>
             <t-tab-panel value="detail" label="视频详情">
@@ -334,6 +331,8 @@ const getHotList = async (retryCount = 1) => {
 const handleSearch = async () => {
   const kw = searchText.value;
   const page = pagination.value.current;
+
+  active.tab = 'search';
 
   await getSearchList(kw, page);
 };
