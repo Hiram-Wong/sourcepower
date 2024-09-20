@@ -18,6 +18,7 @@ declare module 'vue' {
     Submit: typeof import('./src/components/comment/submit/index.vue')['default']
     TAlert: typeof import('tdesign-vue-next')['Alert']
     TAside: typeof import('tdesign-vue-next')['Aside']
+    TAvatar: typeof import('tdesign-vue-next')['Avatar']
     TBreadcrumb: typeof import('tdesign-vue-next')['Breadcrumb']
     TBreadcrumbItem: typeof import('tdesign-vue-next')['BreadcrumbItem']
     TButton: typeof import('tdesign-vue-next')['Button']
