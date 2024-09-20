@@ -211,7 +211,7 @@ const onClickConfirm = () => {
           flex: 1;
         }
 
-        .search-box {
+        .search-input {
           :deep(.t-input) {
             border-color: transparent;
             background-color: transparent;
