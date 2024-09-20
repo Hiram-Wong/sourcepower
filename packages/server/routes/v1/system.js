@@ -3,7 +3,7 @@ const geoip = require("geoip-lite");
 const fs = require("fs");
 const path = require("path");
 
-const { knex, upload, userFileUpload } = require("../../utils/common");
+const { knex, upload } = require("../../utils/common");
 const { authenticateJWT, authorizeRole } = require("../../utils/middleware");
 
 const router = express.Router();
