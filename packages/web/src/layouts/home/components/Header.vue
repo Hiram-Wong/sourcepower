@@ -3,7 +3,7 @@
     <div class="header">
       <t-head-menu expand-type="popup" class="header" v-model="activeMenu" @change="changeHandler">
         <template #logo>
-          <img class="logo" src="@/assets/logo.png" alt="logo" @click="logoHandle('index')">
+          <img class="logo" src="@/assets/logo.png" alt="logo" @click="logoHandle('index')" />
         </template>
 
         <t-menu-item v-for="(item, index) in MENU_LIST" :key="index" :value="item.value">
@@ -13,19 +13,33 @@
         <template #operations>
           <div class="t-nav">
             <div class="t-menu-prefix">
-              <t-button theme="default" shape="square" variant="text" @click="isVisible.menu = !isVisible.menu"
-                class="mobile-navigation">
+              <t-button
+                theme="default"
+                shape="square"
+                variant="text"
+                @click="isVisible.menu = !isVisible.menu"
+                class="mobile-navigation"
+              >
                 <menu-fold-icon v-if="isVisible.menu" />
                 <menu-unfold-icon v-else />
               </t-button>
-              <t-drawer v-model:visible="isVisible.menu" attach="body" :footer="false" placement="left"
-                class="mobile-sidebar">
+              <t-drawer
+                v-model:visible="isVisible.menu"
+                attach="body"
+                :footer="false"
+                placement="left"
+                class="mobile-sidebar"
+              >
                 <ul class="t-menu-custom mobile-menu">
-                  <t-menu-item v-for="(item, index) in MENU_LIST" :key="index" :value="item.value"
-                    @click="isVisible.menu = false">
-                    <div style="margin-left: 8px;">
+                  <t-menu-item
+                    v-for="(item, index) in MENU_LIST"
+                    :key="index"
+                    :value="item.value"
+                    @click="isVisible.menu = false"
+                  >
+                    <div style="margin-left: 8px">
                       <icon :name="item.icon" />
-                      <span style="margin-left: 8px;">{{ item.label }}</span>
+                      <span style="margin-left: 8px">{{ item.label }}</span>
                     </div>
                   </t-menu-item>
                 </ul>
@@ -35,17 +49,26 @@
           <t-dropdown :min-column-width="120" trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
-                <t-dropdown-item class="operations-dropdown-container-item" @click="handleNav('/login')"
-                  v-if="!userStore.token">
+                <t-dropdown-item
+                  class="operations-dropdown-container-item"
+                  @click="handleNav('/login')"
+                  v-if="!userStore.token"
+                >
                   <login-icon />前往登录
                 </t-dropdown-item>
 
-                <t-dropdown-item class="operations-dropdown-container-item" @click="handleNav('/admin')"
-                  v-if="userStore.userInfo.roles.includes('admin')">
+                <t-dropdown-item
+                  class="operations-dropdown-container-item"
+                  @click="handleNav('/admin')"
+                  v-if="userStore.userInfo.roles.includes('admin')"
+                >
                   <work-icon />前往后台
                 </t-dropdown-item>
-                <t-dropdown-item class="operations-dropdown-container-item" @click="handleLogout"
-                  v-if="userStore.token">
+                <t-dropdown-item
+                  class="operations-dropdown-container-item"
+                  @click="handleLogout"
+                  v-if="userStore.token"
+                >
                   <poweroff-icon />退出登录
                 </t-dropdown-item>
               </t-dropdown-menu>
@@ -68,27 +91,38 @@ import { Icon, LoginIcon, MenuFoldIcon, MenuUnfoldIcon, PoweroffIcon, WorkIcon }
 import { getActive } from '@/router';
 import { useUserStore } from '@/store';
 
-const MENU_LIST = [{
-  label: '首页',
-  value: 'index',
-  icon: 'home'
-}, {
-  label: '数据',
-  value: 'source',
-  icon: 'code-1'
-}, {
-  label: '投稿',
-  value: 'submit',
-  icon: 'article'
-}, {
-  label: '捐助',
-  value: 'donate',
-  icon: 'gift'
-}, {
-  label: '关于',
-  value: 'about',
-  icon: 'info-circle'
-}]
+const MENU_LIST = [
+  {
+    label: '首页',
+    value: 'index',
+    icon: 'home',
+  },
+  {
+    label: '数据',
+    value: 'source',
+    icon: 'code-1',
+  },
+  {
+    label: '菠菜',
+    value: 'film',
+    icon: 'film',
+  },
+  {
+    label: '投稿',
+    value: 'submit',
+    icon: 'article',
+  },
+  {
+    label: '捐助',
+    value: 'donate',
+    icon: 'gift',
+  },
+  {
+    label: '关于',
+    value: 'about',
+    icon: 'info-circle',
+  },
+];
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -99,9 +133,12 @@ const active = computed(() => {
   return path;
 });
 
-watch(() => active.value, (val) => {
-  activeMenu.value = val;
-})
+watch(
+  () => active.value,
+  (val) => {
+    activeMenu.value = val;
+  },
+);
 
 const activeMenu = ref(active.value);
 

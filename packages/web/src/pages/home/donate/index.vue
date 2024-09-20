@@ -1,27 +1,29 @@
 <template>
   <div class="about-container view-container">
     <div class="content">
-      <t-card title="捐助列表" :bordered="false" class="card-item t-card-tag">
-        <p style="text-align: center;">
+      <t-card title="捐助方式" :bordered="false" class="card-item t-card-tag">
+        <p style="text-align: center">
           <span>捐赠为自愿行为, 不构成合同关系</span>
         </p>
-        <p style="text-align: center;">
+        <p style="text-align: center">
           <span>微信｜支付宝 扫描下方二维码发起捐赠</span>
         </p>
         <div class="donate-method">
           <div class="left-thanks">
-            <img src="@/assets/thanks-left.png">
+            <img src="@/assets/thanks-left.png" />
           </div>
           <div class="qr-code">
-            <img src="@/assets/pay.png">
+            <img src="@/assets/pay.png" />
             <span class="remark">请备注: 源动力</span>
           </div>
           <div class="right-thanks">
-            <img src="@/assets/thanks-right.png">
+            <img src="@/assets/thanks-right.png" />
           </div>
         </div>
+      </t-card>
+      <t-card title="捐助名单" :bordered="false" class="card-item t-card-tag">
         <div class="donate-main">
-          <iframe ref="iframeRef" :src="donateUrl" frameborder="0" class="donate-iframe"></iframe>
+          <iframe ref="iframeRef" :src="iframeUrl" frameborder="0" class="donate-iframe"></iframe>
         </div>
       </t-card>
     </div>
@@ -35,26 +37,24 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { fetchDonate } from '@/api/system';
 
 const iframeRef = useTemplateRef('iframeRef');
-const donateUrl = ref('about:blank');
+const iframeUrl = ref('about:blank');
 
 onMounted(() => {
   getData();
-})
+});
 
 const getData = async () => {
   const response = await fetchDonate();
 
   if (response.code === 0) {
-    donateUrl.value = response.data;
+    iframeUrl.value = response.data;
   } else {
     MessagePlugin.error(response.msg);
-  };
+  }
 };
 
 const adjustIframeStyle = () => {
   if (!iframeRef.value) return;
-
-
 };
 </script>
 

@@ -163,6 +163,18 @@ export default [
           roleCode: "admin",
         },
       },
+      {
+        path: "cms",
+        name: "SystemCms",
+        component: () => import("@/pages/admin/system/cms/index.vue"),
+        meta: {
+          title: {
+            zh_CN: "采集管理",
+            en_US: "CMS",
+          },
+          roleCode: "admin",
+        },
+      },
     ],
   },
 ];

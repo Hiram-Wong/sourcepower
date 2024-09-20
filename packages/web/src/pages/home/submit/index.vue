@@ -40,8 +40,14 @@
             <t-radio-button value="edit">编辑</t-radio-button>
           </t-radio-group>
         </div>
-        <t-form label-align="right" :rules="FORM_RULES" :data="formData.data" :label-width="60" @reset="onReset"
-          @submit="onSubmit">
+        <t-form
+          label-align="right"
+          :rules="FORM_RULES"
+          :data="formData.data"
+          :label-width="70"
+          @reset="onReset"
+          @submit="onSubmit"
+        >
           <t-form-item label="名称" name="name">
             <t-input v-model="formData.data.name" placeholder="请输入名称, 如xx影视"></t-input>
           </t-form-item>
@@ -54,22 +60,31 @@
             </t-radio-group>
           </t-form-item>
 
-          <t-form-item label="敏感" name="sensitive">
+          <t-form-item name="sensitive">
+            <template #label>
+              <span>敏感</span>
+              <t-tooltip content="涩涩和哎呦疼等均数据敏感资源">
+                <info-circle-icon size="16px" style="margin-left: 3px; padding-bottom: 2px" />
+              </t-tooltip>
+            </template>
             <t-radio-group v-model="formData.data.sensitive" variant="default-filled">
               <t-radio-button :value="true">是</t-radio-button>
               <t-radio-button :value="false">否</t-radio-button>
             </t-radio-group>
-            <t-tooltip content="涩涩和哎呦疼等均数据敏感资源">
-              <info-circle-icon style="margin-left: 6px;" />
-            </t-tooltip>
           </t-form-item>
 
           <t-form-item label="数据" name="data">
             <t-input v-model="formData.data.data" placeholder="直链则输入, 文件则上传"></t-input>
             <div clas="data-upload" :style="{ marginLeft: 'var(--td-comp-margin-s)', width: '112px' }">
-              <t-upload v-if="countDown === 0" v-model="files" :size-limit="{ size: 1, unit: 'MB' }"
-                :allow-upload-duplicate-file="true" :multiple="false" :request-method="requestMethod"
-                theme="file"></t-upload>
+              <t-upload
+                v-if="countDown === 0"
+                v-model="files"
+                :size-limit="{ size: 1, unit: 'MB' }"
+                :allow-upload-duplicate-file="true"
+                :multiple="false"
+                :request-method="requestMethod"
+                theme="file"
+              ></t-upload>
               <t-button v-else variant="outline" disabled :style="{ width: '100%' }">
                 {{ `${countDown}秒后可上传` }}
               </t-button>
@@ -77,16 +92,25 @@
           </t-form-item>
 
           <t-form-item label="描述" name="desc">
-            <t-textarea v-model="formData.data.desc" placeholder="请输入介绍, 如来源、域名、访问速度、质量、有无广告等"></t-textarea>
+            <t-textarea
+              v-model="formData.data.desc"
+              placeholder="请输入介绍, 如来源、域名、访问速度、质量、有无广告等"
+            ></t-textarea>
           </t-form-item>
 
-          <t-form-item label="扩展" name="ext">
-            <t-space direction="vertical" size="2px" style="flex: 1;">
-              <t-textarea v-model="formData.data.ext" placeholder="填写字典格式"></t-textarea>
-              <p v-for="(item, index) in DATA_EXT_INFO" :key="index" class="ext-tip">
-                {{ item.desc }}
-              </p>
-            </t-space>
+          <t-form-item name="ext">
+            <template #label>
+              <span>扩展</span>
+              <t-tooltip>
+                <template #content>
+                  <p v-for="(item, index) in DATA_EXT_INFO" :key="index" class="ext-tip">
+                    {{ item.desc }}
+                  </p>
+                </template>
+                <info-circle-icon size="16px" style="margin-left: 3px; padding-bottom: 2px" />
+              </t-tooltip>
+            </template>
+            <t-textarea v-model="formData.data.ext" placeholder="填写字典格式"></t-textarea>
           </t-form-item>
 
           <t-form-item>
@@ -97,7 +121,7 @@
           </t-form-item>
         </t-form>
       </t-card>
-      
+
       <t-card title="历史记录" :bordered="false" class="card-item t-card-tag" v-if="historyList.length > 0">
         <t-list :async-loading="asyncLoading" split @load-more="loadMore">
           <t-list-item v-for="item in historyList" :key="item.id">
@@ -105,9 +129,7 @@
               <template #title>
                 {{ item.name }}
               </template>
-              <template #description>
-                发布于 {{ formatDate(item.created_at) }}
-              </template>
+              <template #description> 发布于 {{ formatDate(item.created_at) }} </template>
             </t-list-item-meta>
             <template #action>
               <span>
@@ -116,8 +138,14 @@
                   <t-tag v-else-if="item.audit === -2" shape="round" theme="danger">未通过</t-tag>
                   <t-tag v-else-if="item.audit === -1" shape="round" theme="default">待审核</t-tag>
                 </span>
-                <t-link v-if="item.audit === 0" theme="primary" hover="color" style="margin-left: 16px"
-                  @click="handleDetail(item.id)">详情</t-link>
+                <t-link
+                  v-if="item.audit === 0"
+                  theme="primary"
+                  hover="color"
+                  style="margin-left: 16px"
+                  @click="handleDetail(item.id)"
+                  >详情</t-link
+                >
                 <t-link theme="primary" hover="color" style="margin-left: 16px" @click="onEdit(item)">修改</t-link>
               </span>
             </template>
@@ -148,7 +176,7 @@ const FORM_RULES = {
   name: [{ required: true, message: '必填', type: 'error', trigger: 'blur' }],
   data: [{ required: true, message: '必填' }],
   type: [{ required: true, message: '必填' }],
-  sensitive: [{ required: true, message: '必填' }]
+  sensitive: [{ required: true, message: '必填' }],
 };
 
 const [countDown, handleCounter] = useCounter();
@@ -167,7 +195,7 @@ const formData = ref({
     type: 'site',
     sensitive: false,
     ext: '',
-    data: ''
+    data: '',
   },
   raw: {
     id: null,
@@ -176,8 +204,8 @@ const formData = ref({
     type: 'site',
     sensitive: false,
     ext: '',
-    data: ''
-  }
+    data: '',
+  },
 });
 const asyncLoadingRadio = ref('load-more');
 const historyList = ref([]);
@@ -193,7 +221,7 @@ onMounted(() => {
   if (userStore.token) {
     getHistory();
   }
-})
+});
 
 const loadMore = async () => {
   if (historyList.value.length >= pagination.value.total) asyncLoadingRadio.value = 'done';
@@ -222,11 +250,11 @@ const getHistory = async () => {
       pagination.value.current = pagination.value.current;
     } else {
       MessagePlugin.error(`fail ${response.msg}`);
-    };
+    }
   } catch (err) {
     MessagePlugin.error(`fail ${err.message}`);
   }
-}
+};
 
 const asyncLoading = computed(() => {
   if (asyncLoadingRadio.value === 'done') {
@@ -244,7 +272,7 @@ const onReset = () => {
       type: 'site',
       sensitive: false,
       ext: '',
-      data: ''
+      data: '',
     };
   } else if (type === 'edit') {
     const data = { ...formData.value.raw };
@@ -252,60 +280,64 @@ const onReset = () => {
     delete dataCopy.id;
     delete dataCopy.audit;
     formData.value.data = dataCopy;
-  };
-}
+  }
+};
 
-const onSubmit = throttle(async ({ validateResult, firstError }) => {
-  if (validateResult === true) {
-    try {
-      if (!userStore.token) {
-        MessagePlugin.warning('请先登录');
-        return;
-      };
+const onSubmit = throttle(
+  async ({ validateResult, firstError }) => {
+    if (validateResult === true) {
+      try {
+        if (!userStore.token) {
+          MessagePlugin.warning('请先登录');
+          return;
+        }
 
-      if (formData.value.data.ext) {
-        try {
-          const parsedExt = JSON.parse(formData.value.data.ext);
-          if (typeof parsedExt !== 'object' || parsedExt === null) {
+        if (formData.value.data.ext) {
+          try {
+            const parsedExt = JSON.parse(formData.value.data.ext);
+            if (typeof parsedExt !== 'object' || parsedExt === null) {
+              MessagePlugin.warning('扩展参数非标准JSON格式');
+              return;
+            }
+          } catch {
             MessagePlugin.warning('扩展参数非标准JSON格式');
             return;
           }
-        } catch {
-          MessagePlugin.warning('扩展参数非标准JSON格式');
-          return;
         }
-      };
 
-      let response;
-      if (active.dialog === 'edit') {
-        response = await putContent(formData.value.raw.id, formData.value.data);
-      } else {
-        response = await addContent(formData.value.data);
-      }
-      if (response.code === 0) {
-        MessagePlugin.info('数据上传成功, 等待审核')
+        let response;
+        if (active.dialog === 'edit') {
+          response = await putContent(formData.value.raw.id, formData.value.data);
+        } else {
+          response = await addContent(formData.value.data);
+        }
+        if (response.code === 0) {
+          MessagePlugin.info('数据上传成功, 等待审核');
 
-        pagination.value.current = 1;
-        pagination.value.total = 0;
-        historyList.value = [];
-        getHistory();
-      } else if (response.code === -2) {
-        await userStore.logout();
-        MessagePlugin.info('登录凭证过期, 重新登录')
-      } else {
-        MessagePlugin.error(response.msg)
+          pagination.value.current = 1;
+          pagination.value.total = 0;
+          historyList.value = [];
+          getHistory();
+        } else if (response.code === -2) {
+          await userStore.logout();
+          MessagePlugin.info('登录凭证过期, 重新登录');
+        } else {
+          MessagePlugin.error(response.msg);
+        }
+      } catch (err) {
+        MessagePlugin.error(err);
       }
-    } catch (err) {
-      MessagePlugin.error(err)
+    } else {
+      console.log('Validate Errors: ', firstError, validateResult);
+      MessagePlugin.warning(firstError);
     }
-  } else {
-    console.log('Validate Errors: ', firstError, validateResult);
-    MessagePlugin.warning(firstError);
-  }
-}, 10000, {
-  leading: true, // 节流开始前，默认true
-  trailing: false // 节流结束后，默认true
-}); // 10s
+  },
+  10000,
+  {
+    leading: true, // 节流开始前，默认true
+    trailing: false, // 节流结束后，默认true
+  },
+); // 10s
 
 const onEdit = async (item) => {
   active.dialog = 'edit';
@@ -320,7 +352,7 @@ const onEdit = async (item) => {
   if (submiteRef.value) {
     nextTick(() => {
       submiteRef.value.scrollIntoView({ behavior: 'smooth' });
-    })
+    });
   }
 };
 
@@ -344,12 +376,12 @@ const requestMethod = (file) => {
       MessagePlugin.error('上传失败');
       resolve({ status: 'fail', error: err.message });
     }
-  })
+  });
 };
 
 const handleDetail = (id) => {
   router.push({ name: 'HomeDetail', params: { id } });
-}
+};
 </script>
 
 <style lang="less" scoped>
@@ -367,7 +399,7 @@ const handleDetail = (id) => {
         padding: var(--td-pop-padding-m);
         border-style: dashed;
         border-radius: var(--td-radius-medium);
-        border-width: 2px;
+        border-width: 1px;
         border-color: var(--td-text-color-placeholder);
 
         .tip {
@@ -387,7 +419,8 @@ const handleDetail = (id) => {
         padding: var(--td-comp-paddingTB-xxs) 0;
       }
 
-      .data-upload {}
+      .data-upload {
+      }
 
       // :deep(.t-upload__dragger) {
       //   width: 100%;
@@ -406,7 +439,6 @@ const handleDetail = (id) => {
 
       .step-item {
         .use-title {
-
           span,
           a {
             font: var(--td-font-body-medium);

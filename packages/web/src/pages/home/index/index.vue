@@ -4,22 +4,21 @@
       <t-card title="可持续源" :bordered="false" class="card-item t-card-tag">
         <div class="soico"></div>
         <p class="tip">订阅一下 · 即刻观看</p>
-        <div class="sub-box">
+        <div class="search-box">
           <t-input-adornment>
             <template #prepend>
-              <t-select v-model="subscribeForm.type" style="width: 70px;">
+              <t-select v-model="subscribeForm.type" style="width: 70px">
                 <t-option label="全部" value="all" />
                 <t-option label="敏感" value="sensitive" />
                 <t-option label="常规" value="nosensitive" />
               </t-select>
             </template>
-            <t-input v-model="subscribeForm.allow_ips" placeholder="请输入授权地址逗号分隔" class="search_input" />
+            <t-input v-model="subscribeForm.allow_ips" placeholder="请输入授权地址逗号分隔" class="search-input" />
           </t-input-adornment>
-          <t-button class="search_button" @click="getCode">
-            订阅
-          </t-button>
+          <t-button class="search-button" @click="getCode"> 订阅 </t-button>
         </div>
       </t-card>
+
       <t-card title="注意事项" :bordered="false" class="card-item t-card-tag">
         <t-collapse class="collapse">
           <t-collapse-panel destroy-on-collapse header="授权地址">
@@ -42,21 +41,13 @@
           </t-collapse-panel>
         </t-collapse>
       </t-card>
-      <t-card title="友情链接" :bordered="false" class="card-item t-card-tag">
-        <div v-if="friendChainList.length === 0">空空如也</div>
-        <div v-else>
-          <t-space break-line size="small">
-            <template v-for="item in friendChainList" :key="item.id">
-              <t-link :href="item.url" target="_blank">{{ item.name }}</t-link>
-            </template>
-          </t-space>
-        </div>
-      </t-card>
     </div>
 
     <t-dialog v-model:visible="isVisible.sub" header="订阅信息" @confirm="onClickConfirm">
       <div class="sub">
-        <p><face-retouching-icon /><span>订阅码: {{ subscribeForm.code }}</span></p>
+        <p>
+          <face-retouching-icon /><span>订阅码: {{ subscribeForm.code }}</span>
+        </p>
         <p><link-icon /><span>订阅: </span></p>
 
         <t-link :href="subscribeForm.url" target="_blank">
@@ -76,7 +67,6 @@ import { isIP } from 'is-ip';
 
 import { setSubscribe } from '@/api/subscribe';
 import { fetchInfo } from '@/api/system';
-import { fetchFriendChainAll } from '@/api/friendchain';
 import { useUserStore } from '@/store';
 
 const userStore = useUserStore();
@@ -91,14 +81,11 @@ const subscribeForm = ref({
 });
 
 const isVisible = reactive({
-  sub: false
-})
-
-const friendChainList = ref([]);
+  sub: false,
+});
 
 onMounted(() => {
   getIp();
-  getFriendChain();
 });
 
 const getIp = async () => {
@@ -108,17 +95,7 @@ const getIp = async () => {
     subscribeForm.value.ip = response.data.ip;
   } else {
     MessagePlugin.error(response.msg);
-  };
-};
-
-const getFriendChain = async () => {
-  const response = await fetchFriendChainAll();
-
-  if (response.code === 0) {
-    friendChainList.value = response.data.list;
-  } else {
-    MessagePlugin.error(response.msg);
-  };
+  }
 };
 
 const getCode = async () => {
@@ -132,13 +109,16 @@ const getCode = async () => {
     MessagePlugin.warning('授权地址必填');
     return;
   } else {
-    const allowIpsList = allow_ips.split(',').map(ip => ip.trim()).filter(ip => ip);
+    const allowIpsList = allow_ips
+      .split(',')
+      .map((ip) => ip.trim())
+      .filter((ip) => ip);
     if (allowIpsList.length > 5) {
       MessagePlugin.warning('最多添加5个IP地址');
       return;
     } else {
       let isValid = true; // 添加一个标志变量
-      allowIpsList.forEach(ip => {
+      allowIpsList.forEach((ip) => {
         if (!isIP(ip)) {
           MessagePlugin.warning('IP地址有误');
           isValid = false; // 设置标志变量为false
@@ -151,10 +131,10 @@ const getCode = async () => {
         return; // 如果有无效的IP，直接退出函数
       }
     }
-  };
+  }
 
   const response = await setSubscribe({
-    allow_ips
+    allow_ips,
   });
 
   if (response.code === 0) {
@@ -164,21 +144,21 @@ const getCode = async () => {
 
     try {
       await toClipboard(subUrl);
-    } catch { }
+    } catch {}
     isVisible.sub = true;
     // MessagePlugin.success(`订阅码: ${response.data.code}`);
     // MessagePlugin.success(`订阅链接: ${subUrl}`);
   } else if (response.code === -2) {
     await userStore.logout();
-    MessagePlugin.info('登录凭证过期, 重新登录')
+    MessagePlugin.info('登录凭证过期, 重新登录');
   } else {
     MessagePlugin.error(response.msg);
-  };
+  }
 };
 
 const onClickConfirm = () => {
   isVisible.sub = false;
-}
+};
 </script>
 
 <style lang="less" scoped>
@@ -202,7 +182,7 @@ const onClickConfirm = () => {
         text-align: center;
       }
 
-      .sub-box {
+      .search-box {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -231,7 +211,7 @@ const onClickConfirm = () => {
           flex: 1;
         }
 
-        .search_input {
+        .search-box {
           :deep(.t-input) {
             border-color: transparent;
             background-color: transparent;
@@ -243,12 +223,11 @@ const onClickConfirm = () => {
           }
         }
 
-        .search_button {
+        .search-button {
           min-width: 60px;
           width: 60px;
         }
       }
-
 
       .collapse {
         border-radius: var(--td-radius-medium);

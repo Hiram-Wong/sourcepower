@@ -6,5 +6,5 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-
+  const TOTAL: typeof import('tdesign-vue-next')['OTAL']
 }

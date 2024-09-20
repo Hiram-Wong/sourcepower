@@ -1,7 +1,6 @@
 <template>
   <div class="notice view-container">
-    <div class="header operation-container">
-    </div>
+    <div class="header operation-container"></div>
 
     <div class="main-container">
       <Editor v-model="formData.value" :readonly="formData.readonly" :minHeight="formData.minHeight" />
@@ -14,13 +13,13 @@
 import { ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 
-import Editor from "@/components/edit/index.vue";
+import Editor from '@/components/edit/index.vue';
 import { putNotice, fetchNotice } from '@/api/system';
 
 const formData = ref({
   value: '',
   readonly: false,
-  minHeight: 300
+  minHeight: 300,
 });
 const dataLoading = ref(false);
 
@@ -35,7 +34,7 @@ const fetchData = async () => {
     if (response.code === 0) {
       formData.value.value = response.data;
     } else {
-      MessagePlugin.error(`获取数据失败:${response.msg}`)
+      MessagePlugin.error(`获取数据失败:${response.msg}`);
     }
   } catch (e) {
     console.log(e);
@@ -47,14 +46,11 @@ const fetchData = async () => {
 const submitData = async () => {
   dataLoading.value = true;
   try {
-    console.log(formData.value.value )
-
-    console.log({ value: formData.value.value })
     const response = await putNotice({ value: formData.value.value });
     if (response.code === 0) {
-      MessagePlugin.success(`success`)
+      MessagePlugin.success(`success`);
     } else {
-      MessagePlugin.error(`fail:${response.msg}`)
+      MessagePlugin.error(`fail:${response.msg}`);
     }
   } catch (e) {
     console.log(e);

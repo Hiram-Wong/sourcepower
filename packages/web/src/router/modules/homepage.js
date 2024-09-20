@@ -33,6 +33,11 @@ export default [
         component: () => import("@/pages/home/donate/index.vue"),
       },
       {
+        path: "film",
+        name: "HomeFilm",
+        component: () => import("@/pages/home/film/index.vue"),
+      },
+      {
         path: "about",
         name: "HomeAbout",
         component: () => import("@/pages/home/about/index.vue"),

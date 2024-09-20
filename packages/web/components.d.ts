@@ -7,16 +7,17 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Captcha: typeof import('./src/components/captcha/index.vue')['default']
     Edit: typeof import('./src/components/edit/index.vue')['default']
     Load: typeof import('./src/components/comment/load/index.vue')['default']
     Markdown: typeof import('./src/components/markdown/index.vue')['default']
+    Player: typeof import('./src/components/player/index.vue')['default']
     Result: typeof import('./src/components/result/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Submit: typeof import('./src/components/comment/submit/index.vue')['default']
     TAlert: typeof import('tdesign-vue-next')['Alert']
     TAside: typeof import('tdesign-vue-next')['Aside']
-    TAvatar: typeof import('tdesign-vue-next')['Avatar']
     TBreadcrumb: typeof import('tdesign-vue-next')['Breadcrumb']
     TBreadcrumbItem: typeof import('tdesign-vue-next')['BreadcrumbItem']
     TButton: typeof import('tdesign-vue-next')['Button']
@@ -41,6 +42,7 @@ declare module 'vue' {
     THeadMenu: typeof import('tdesign-vue-next')['HeadMenu']
     Thumbnail: typeof import('./src/components/thumbnail/index.vue')['default']
     TIcon: typeof import('tdesign-vue-next')['Icon']
+    TImage: typeof import('tdesign-vue-next')['Image']
     TInput: typeof import('tdesign-vue-next')['Input']
     TInputAdornment: typeof import('tdesign-vue-next')['InputAdornment']
     TLayout: typeof import('tdesign-vue-next')['Layout']

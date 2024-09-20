@@ -4,7 +4,7 @@ import router, { allRoutes, homeRoutes } from "@/router";
 import { store } from "@/store";
 
 function filterPermissionsRouters(routes, roles) {
-  if (roles.includes("user")) roles = ["HomeIndex", "HomeDetail" ,"HomeSource", "HomeAbout", "HomeSubmit", "HomeDonate", "Login"];;
+  if (roles.includes("user")) roles = ["HomeIndex", "HomeDetail" ,"HomeSource", "HomeAbout", "HomeSubmit", "HomeDonate", "HomeFilm", "Login"];;
   const res = [];
   const removeRoutes = [];
   routes.forEach((route) => {
@@ -27,7 +27,7 @@ function filterPermissionsRouters(routes, roles) {
 
 export const usePermissionStore = defineStore("permission", {
   state: () => ({
-    whiteListRouters: ["HomeIndex", "HomeSource", "HomeAbout", "HomeSubmit", "HomeDonate", "Login"],
+    whiteListRouters: ["HomeIndex", "HomeSource", "HomeAbout", "HomeSubmit", "HomeDonate", "HomeFilm", "Login"],
     routers: [],
     removeRoutes: [],
   }),
