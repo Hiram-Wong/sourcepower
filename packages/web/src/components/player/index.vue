@@ -1,110 +1,93 @@
 <template>
-  <div ref="videoContainer" class="dplayer-container"></div>
+  <div id="videoContainer" ref="videoContainerRef"></div>
 </template>
 
 <script lang="js" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import DPlayer from 'dplayer';
+import { ref, onMounted, onBeforeUnmount, useTemplateRef } from 'vue';
+import Artplayer from 'artplayer';
 import Hls from 'hls.js';
+import flvjs from 'flv.js';
 
 const props = defineProps({
-  video: {
+  option: {
     type: Object,
-    default: () => ({
-      url: '',
-      type: '',
-    }),
-  },
-  autoplay: {
-    type: Boolean,
-    default: true,
-  },
-  theme: {
-    type: String,
-    default: '#4582e6',
-  },
-  loop: {
-    type: Boolean,
-    default: false,
-  },
-  playbackSpeed: {
-    type: Array,
-    default: [0.5, 0.75, 1, 1.25, 1.5, 2],
-  },
-  lang: {
-    type: String,
-    default: () => navigator.language.toLowerCase(),
-  },
-  screenshot: {
-    type: Boolean,
-    default: false,
-  },
-  hotkey: {
-    type: Boolean,
-    default: true,
-  },
-  preload: {
-    type: String,
-    default: 'auto',
-  },
-  volume: {
-    type: Number,
-    default: 0.7,
-  },
-  danmaku: {
-    type: Object,
-    default: () => ({}),
+    required: true,
   },
 });
 
-const videoContainer = ref(null);
-let dplayerInstance = null;
+const videoOptions = {
+  theme: '#0052d9',
+  volume: 0.5,
+  autoplay: true,
+  muted: true,
+  playbackRate: true,
+  aspectRatio: true,
+  setting: true,
+  hotkey: true,
+  pip: true,
+  fullscreen: true,
+  playsInline: true,
+};
+
+let instance = null;
+const videoContainerRef = useTemplateRef('videoContainerRef');
+
+const playM3u8 = (video, url, art) => {
+  if (Hls.isSupported()) {
+    if (art.hls) art.hls.destroy();
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    art.hls = hls;
+    art.on('destroy', () => hls.destroy());
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  } else {
+    art.notice.show = 'Unsupported playback format: m3u8';
+  }
+};
+
+const playFlv = (video, url, art) => {
+  if (flvjs.isSupported()) {
+    if (art.flv) art.flv.destroy();
+    const flv = flvjs.createPlayer({ type: 'flv', url });
+    flv.attachMediaElement(video);
+    flv.load();
+    art.flv = flv;
+    art.on('destroy', () => flv.destroy());
+  } else {
+    art.notice.show = 'Unsupported playback format: flv';
+  }
+};
 
 onMounted(() => {
-  const options = {
-    container: videoContainer.value,
-    autoplay: props.autoplay,
-    playbackSpeed: props.playbackSpeed,
-    theme: props.theme,
-    loop: props.loop,
-    lang: props.lang,
-    screenshot: props.screenshot,
-    hotkey: props.hotkey,
-    preload: props.preload,
-    volume: props.volume,
-    video: {
-      url: props.video.url,
-    },
-    ...(Object.keys(props.danmaku).length !== 0 && { danmaku: props.danmaku }),
-  };
+  let options = Object.assign({}, { container: videoContainerRef.value }, videoOptions, { ...props.option });
 
-  if (props.video.type === 'hls' && Hls.isSupported()) {
-    options.video.type = 'customHls';
-    options.video.customType = {
-      customHls: (video, player) => {
-        const hls = new Hls();
-        hls.loadSource(video.src);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play();
-        });
-      },
+  const videoType = props.option.type || 'mp4';
+
+  if (videoType === 'm3u8') {
+    options.customType = {
+      m3u8: playM3u8,
+    };
+  } else if (videoType === 'flv') {
+    options.customType = {
+      flv: playFlv,
     };
   }
 
-  dplayerInstance = new DPlayer(options);
+  instance = new Artplayer(options);
 });
 
 onBeforeUnmount(() => {
-  if (dplayerInstance) {
-    dplayerInstance.destroy();
-    dplayerInstance = null;
+  if (instance && instance.destroy) {
+    instance.destroy(false);
+    instance = null;
   }
 });
 </script>
 
 <style scoped>
-.dplayer-container {
+#videoContainer {
   width: 100%;
   height: 100%;
 }
