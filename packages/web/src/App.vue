@@ -22,10 +22,10 @@ const active = reactive({
 
 onMounted(() => {
   const userAgent = navigator.userAgent.toLowerCase();
-
   const isWebview = (ua) => {
-    return /Feishu|DingTalk|MicroMessenger|Bytedance|NewsArticle|Zhihu|Weibo|AlipayClient|MQQBrowser/gi.test(ua);
+    return /MicroMessenger|wxwork|QQTheme/gi.test(ua);
   };
+
   active.webview = isWebview(userAgent);
 });
 </script>
