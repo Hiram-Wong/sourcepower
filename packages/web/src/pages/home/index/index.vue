@@ -2,7 +2,9 @@
   <div class="home view-container">
     <div class="content">
       <t-card title="可持续源" :bordered="false" class="card-item t-card-tag">
-        <div class="soico"></div>
+        <div class="soico">
+          <img src="@/assets/soico.webp" alt="soico" loading="lazy" />
+        </div>
         <p class="tip">订阅一下 · 即刻观看</p>
         <div class="search-box">
           <t-input-adornment>
@@ -163,13 +165,16 @@ const onClickConfirm = () => {
   .content {
     .card-item {
       .soico {
-        background: url(@/assets/soico.svg) no-repeat;
         width: 150px;
         height: 150px;
         margin: 0 auto;
         background-size: cover;
         background-position: 0 15px;
-        filter: drop-shadow(0px 5px 3px rgba(43, 48, 68, 0.4)) drop-shadow(0px 10px 16px rgba(43, 48, 68, 0.05));
+
+        img {
+          height: 100%;
+          width: 100%;
+        }
       }
 
       .tip {
