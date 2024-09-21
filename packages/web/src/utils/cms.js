@@ -69,7 +69,7 @@ const  formatVideoType = async (url) => {
 
   switch (ext) {
     case 'm3u8':
-      return 'hls';
+      return 'm3u8';
     case 'mp4':
       return 'mp4';
     case 'flv':
@@ -80,7 +80,7 @@ const  formatVideoType = async (url) => {
         const contentType = response.headers.get('Content-Type');
         if (contentType) {
           if (contentType.includes('application/vnd.apple.mpegurl')) {
-            return 'hls';
+            return 'm3u8';
           } else if (contentType.includes('video/mp4')) {
             return 'mp4';
           } else if (contentType.includes('video/x-flv')) {

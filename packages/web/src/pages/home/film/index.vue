@@ -21,7 +21,7 @@
               </div>
             </div>
           </div>
-          <PlayerView :video="videoInfo" v-else style="border-radius: var(--td-radius-medium); overflow: hidden" />
+          <PlayerView :option="videoOption" v-else style="border-radius: var(--td-radius-medium); overflow: hidden" />
         </div>
       </t-card>
 
@@ -236,9 +236,9 @@ const active = reactive({
   playing: false,
   hotSource: 0,
 });
-const videoInfo = ref({
+const videoOption = ref({
   url: '',
-  type: 'hls',
+  type: 'm3u8',
 });
 const hotOption = reactive([
   {
@@ -278,6 +278,7 @@ const getSearchList = async (kw, page) => {
     if (response.code === 0) {
       table.value = response.data.list;
       pagination.value.total = response.data.total;
+      active.tab = 'search';
     } else {
       MessagePlugin.error(`fail ${response.msg}`);
     }
@@ -294,6 +295,7 @@ const getDetail = async (id) => {
 
     if (response.code === 0) {
       detail.value = response.data;
+      active.tab = 'detail';
     } else {
       MessagePlugin.error(`fail ${response.msg}`);
     }
@@ -332,8 +334,6 @@ const handleSearch = async () => {
   const kw = searchText.value;
   const page = pagination.value.current;
 
-  active.tab = 'search';
-
   await getSearchList(kw, page);
 };
 
@@ -343,8 +343,6 @@ const handleDetail = async (id) => {
   const formatData = formatSeason(detail.value);
   detail.value.season_list = formatData;
   active.flimSource = Object.keys(formatData)[0];
-
-  active.tab = 'detail';
 };
 
 const onCurrentChange = async (context) => {
@@ -391,7 +389,7 @@ const changeEvent = async (item) => {
   const videoType = await formatVideoType(url);
 
   if (videoType !== 'unknown') {
-    videoInfo.value = {
+    videoOption.value = {
       url,
       type: videoType,
     };
