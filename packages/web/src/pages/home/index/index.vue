@@ -21,7 +21,7 @@
 
       <t-card title="注意事项" :bordered="false" class="card-item t-card-tag">
         <t-collapse class="collapse">
-          <t-collapse-panel destroy-on-collapse header="授权地址">
+          <t-collapse-panel destroy-on-collapse header="授权说明">
             <p>1.当前请求地址: {{ subscribeForm.ip ? subscribeForm.ip : '未知' }}</p>
             <p>2.服务器没有ipv6地址, 故不支持ipv6授权</p>
             <p>3.最多授权5个ip, 多ip使用半角逗号分隔</p>
@@ -30,12 +30,12 @@
           <t-collapse-panel header="使用方法">
             <p>1.使用邮箱注册账户[有账号则跳过]</p>
             <p>2.登录账户</p>
-            <p>3.选择数据类型, 并输入授权的ip地址点击'订阅'</p>
+            <p>3.选择数据类型, 并输入授权的ip地址点击订阅</p>
             <p>4.在弹窗中获取订阅码链接</p>
           </t-collapse-panel>
           <t-collapse-panel header="白嫖原则">
             <p>1.仅供学习, 勿用于商业及引流</p>
-            <p>2.请勿使用服务器爬虫[小黑子勿扰]</p>
+            <p>2.请勿使用服务器爬虫</p>
             <p>3.每次请求均可溯源, 网络非法外之地</p>
             <p>4.切勿使用临时邮箱注册, 一经发现即删除账户</p>
           </t-collapse-panel>
@@ -60,17 +60,16 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import useClipboard from 'vue-clipboard3';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { LinkIcon, FaceRetouchingIcon } from 'tdesign-icons-vue-next';
 import { isIP } from 'is-ip';
+import { useClipboard } from '@vueuse/core';
 
 import { setSubscribe } from '@/api/subscribe';
 import { fetchInfo } from '@/api/system';
 import { useUserStore } from '@/store';
 
 const userStore = useUserStore();
-const { toClipboard } = useClipboard();
 
 const subscribeForm = ref({
   allow_ips: '',
@@ -142,12 +141,10 @@ const getCode = async () => {
     const subUrl = `${window.location.origin}/api/v1/subscribe/${response.data.code}/sub?type=${subscribeForm.value.type}`;
     subscribeForm.value.url = subUrl;
 
-    try {
-      await toClipboard(subUrl);
-    } catch {}
+    const { copy } = useClipboard({ source: subUrl });
+    await copy();
+
     isVisible.sub = true;
-    // MessagePlugin.success(`订阅码: ${response.data.code}`);
-    // MessagePlugin.success(`订阅链接: ${subUrl}`);
   } else if (response.code === -2) {
     await userStore.logout();
     MessagePlugin.info('登录凭证过期, 重新登录');

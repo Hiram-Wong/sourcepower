@@ -84,7 +84,7 @@
 import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { GiftIcon } from 'tdesign-icons-vue-next';
+import { useClipboard } from '@vueuse/core';
 
 import { fetchNotice } from '@/api/system';
 import { fetchFriendChainAll } from '@/api/friendchain';
@@ -132,12 +132,10 @@ const getFriendChain = async () => {
   }
 };
 
-const clickLink = (url) => {
-  router.push(url);
-};
+const copyWxLink = async () => {
+  const { copy } = useClipboard({ source: 'HiramWong' });
+  await copy();
 
-const copyWxLink = () => {
-  navigator.clipboard.writeText(`HiramWong`);
   MessagePlugin.info('公众号 ID 已拷贝到您的剪切板啦~');
 };
 </script>

@@ -81,7 +81,6 @@ const BROWSERS = {
 };
 
 const url = computed(() => window.location.href);
-const { copy } = useClipboard({ source: url.value });
 
 onMounted(() => {
   document.title = '请在系统浏览器打开';
@@ -89,6 +88,8 @@ onMounted(() => {
 
 const copyText = async () => {
   try {
+    const { copy } = useClipboard({ source: url.value });
+
     await copy();
     MessagePlugin.success('已复制到剪贴板');
   } catch (error) {

@@ -201,6 +201,7 @@ import { computed, onMounted, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { LinkIcon, InfoCircleIcon, CloseIcon, ChatIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
+import { useClipboard } from '@vueuse/core';
 
 import findIndex from 'lodash/findIndex';
 
@@ -487,7 +488,9 @@ const onShareDrpyHiker = async () => {
         body: template,
         confirmBtn: '确定',
         cancelBtn: '取消',
-        onConfirm: ({ e }) => {
+        onConfirm: async ({ e }) => {
+          const { copy } = useClipboard({ source: template });
+          await copy();
           confirmDia.hide();
         },
         onClose: ({ e, trigger }) => {
