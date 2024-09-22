@@ -25,9 +25,10 @@
         <t-collapse class="collapse">
           <t-collapse-panel destroy-on-collapse header="授权说明">
             <p>1.当前请求地址: {{ subscribeForm.ip ? subscribeForm.ip : '未知' }}</p>
-            <p>2.服务器没有ipv6地址, 故不支持ipv6授权</p>
+            <p>2.服务器无ipv6地址, 故不支持ipv6授权</p>
             <p>3.最多授权5个ip, 多ip使用半角逗号分隔</p>
-            <p>4.重新授权ip只需重新提交即可</p>
+            <p>4.本站根据用户公网ip授权, 故ip变动会导致数据失效</p>
+            <p>5.重新授权只需重新提交即可</p>
           </t-collapse-panel>
           <t-collapse-panel header="使用方法">
             <p>1.使用邮箱注册账户[有账号则跳过]</p>
