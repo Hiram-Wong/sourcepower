@@ -117,7 +117,7 @@
               <render-markdown v-model:markdownText="item.compiled_content" />
             </template>
             <template #actions>
-              <t-space key="chat" :size="6" @click="onSubmitCommentDialog(item.comment_id)">
+              <t-space key="chat" :size="6" @click="onSubmitCommentDialog(item.comment_id, item.user)">
                 <chat-icon />
                 <span>回复</span>
               </t-space>
@@ -350,10 +350,12 @@ const onSubmitComment = async () => {
   }
 };
 
-const onSubmitCommentDialog = async (id) => {
+const onSubmitCommentDialog = async (id, to) => {
   active.replyDialog = true;
 
   commentFormData.value.parent_id = id;
+  commentFormData.value.to.id = null;
+  commentFormData.value.to.name = to.username;
 };
 
 const onSubmitReplyDialog = async (id, to) => {
