@@ -43,6 +43,64 @@
           </t-collapse-panel>
         </t-collapse>
       </t-card>
+
+      <t-card title="专属仓库" :bordered="false" class="card-item t-card-tag">
+        <div class="personal">
+          <p class="tip">制作专属于你的数据吧, 请自行建立本地仓并维护。</p>
+          <t-steps layout="vertical" :current="8" theme="dot" readonly>
+            <t-step-item title="步骤一">
+              <template #content>
+                <p>1. 在本地创建文件夹</p>
+                <p>
+                  2. 下载必要的文件并解压 -
+                  <t-link
+                    theme="primary"
+                    href="https://filedoge.com/download/c70bc3cc560d18e0e17d0f93b5e2d7f5673addc02871957ca7ad578b70a3422b40f0b95f95607571589e"
+                    >点我下载</t-link
+                  >
+                </p>
+              </template>
+            </t-step-item>
+            <t-step-item title="步骤二">
+              <template #content>
+                <p>1. 注册一个账号并登录</p>
+                <p>2. 选择需要的数据</p>
+                <p>3. 本地创建文件并将数据写入(影视为例)</p>
+                <t-image-viewer :key="img2" :images="images" v-model:visible="isVisible.imageStep2" :default-index="0">
+                  <template #trigger>
+                    <div class="tdesign-demo-image-viewer__ui-image">
+                      <img alt="test" :src="img2" class="tdesign-demo-image-viewer__ui-image--img" />
+                      <div class="tdesign-demo-image-viewer__ui-image--hover" @click="onStepOpen(2)">
+                        <span><BrowseIcon size="1.4em" /> 预览</span>
+                      </div>
+                    </div>
+                  </template>
+                </t-image-viewer>
+              </template>
+            </t-step-item>
+            <t-step-item title="步骤三">
+              <template #content>
+                <p>修改index.json文件内容</p>
+                <t-image-viewer :key="img3" :images="images" v-model:visible="isVisible.imageStep3" :default-index="1">
+                  <template #trigger>
+                    <div class="tdesign-demo-image-viewer__ui-image">
+                      <img alt="test" :src="img3" class="tdesign-demo-image-viewer__ui-image--img" />
+                      <div class="tdesign-demo-image-viewer__ui-image--hover" @click="onStepOpen(3)">
+                        <span><BrowseIcon size="1.4em" /> 预览</span>
+                      </div>
+                    </div>
+                  </template>
+                </t-image-viewer>
+              </template>
+            </t-step-item>
+            <t-step-item title="步骤四[可跳过]">
+              <template #content>如需在线访问则将制作的所有内容上传至服务器</template>
+            </t-step-item>
+          </t-steps>
+          <t-divider style="margin: var(--td-comp-margin-s) 0" />
+          <p style="color: var(--td-text-color-placeholder); font-size: 12px">希望你是自用数据, 请勿用于商业和引流。</p>
+        </div>
+      </t-card>
     </div>
 
     <t-dialog v-model:visible="isVisible.sub" header="订阅信息" @confirm="onClickConfirm">
@@ -63,7 +121,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { LinkIcon, FaceRetouchingIcon } from 'tdesign-icons-vue-next';
+import { BrowseIcon, LinkIcon, FaceRetouchingIcon } from 'tdesign-icons-vue-next';
 import { isIP } from 'is-ip';
 import { useClipboard } from '@vueuse/core';
 
@@ -71,7 +129,14 @@ import { setSubscribe } from '@/api/subscribe';
 import { fetchInfo } from '@/api/system';
 import { useUserStore } from '@/store';
 
+import ImgStep2 from '@/assets/personal/step2.png';
+import ImgStep3 from '@/assets/personal/step3.png';
+
 const userStore = useUserStore();
+
+const img2 = ImgStep2;
+const img3 = ImgStep3;
+const images = [img2, img3];
 
 const subscribeForm = ref({
   allow_ips: '',
@@ -83,7 +148,20 @@ const subscribeForm = ref({
 
 const isVisible = reactive({
   sub: false,
+  imageStep2: false,
+  imageStep3: false,
 });
+
+const onStepOpen = (type) => {
+  switch (type) {
+    case 2:
+      isVisible.imageStep2 = true;
+      break;
+    case 3:
+      isVisible.imageStep3 = true;
+      break;
+  }
+};
 
 onMounted(() => {
   getIp();
@@ -157,6 +235,16 @@ const getCode = async () => {
 
 const onClickConfirm = () => {
   isVisible.sub = false;
+};
+
+const openImge = (type) => {
+  switch (type) {
+    case 2:
+      MessagePlugin.info('该图片已失效');
+      break;
+    case 3:
+      break;
+  }
 };
 </script>
 
@@ -239,6 +327,102 @@ const onClickConfirm = () => {
           .t-collapse-panel__content {
             padding: var(--td-pop-padding-m);
           }
+        }
+      }
+
+      .personal {
+        .tip {
+          word-break: break-all;
+          text-align: left;
+          margin: var(--td-comp-margin-s) 0;
+
+          &::before {
+            content: '';
+            border-radius: var(--td-radius-medium);
+            border-left: 3px solid var(--td-brand-color);
+            margin-right: var(--td-comp-margin-s);
+          }
+        }
+
+        :deep(.t-steps--vertical.t-steps--positive) {
+          .t-steps-item {
+            padding: 0;
+          }
+        }
+
+        .tdesign-demo-image-viewer__ui-image {
+          width: 100%;
+          height: 100px;
+          display: inline-flex;
+          position: relative;
+          justify-content: center;
+          align-items: center;
+          border-radius: var(--td-radius-small);
+          overflow: hidden;
+        }
+
+        .tdesign-demo-image-viewer__ui-image--hover {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: absolute;
+          left: 0;
+          top: 0;
+          opacity: 0;
+          background-color: rgba(0, 0, 0, 0.6);
+          color: var(--td-text-color-anti);
+          line-height: 22px;
+          transition: 0.2s;
+        }
+
+        .tdesign-demo-image-viewer__ui-image:hover .tdesign-demo-image-viewer__ui-image--hover {
+          opacity: 1;
+          cursor: pointer;
+        }
+
+        .tdesign-demo-image-viewer__ui-image--img {
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          max-height: 100%;
+          cursor: pointer;
+          position: absolute;
+        }
+
+        .tdesign-demo-image-viewer__ui-image--footer {
+          padding: 0 16px;
+          height: 56px;
+          width: 100%;
+          line-height: 56px;
+          font-size: 16px;
+          position: absolute;
+          bottom: 0;
+          color: var(--td-text-color-anti);
+          background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+          display: flex;
+          box-sizing: border-box;
+        }
+
+        .tdesign-demo-image-viewer__ui-image--title {
+          flex: 1;
+        }
+
+        .tdesign-demo-popup__reference {
+          margin-left: 16px;
+        }
+
+        .tdesign-demo-image-viewer__ui-image--icons .tdesign-demo-icon {
+          cursor: pointer;
+        }
+
+        .tdesign-demo-image-viewer__base {
+          width: 160px;
+          height: 160px;
+          margin: 10px;
+          border: 4px solid var(--td-bg-color-secondarycontainer);
+          border-radius: var(--td-radius-medium);
         }
       }
     }
