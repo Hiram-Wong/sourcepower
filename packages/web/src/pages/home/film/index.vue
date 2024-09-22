@@ -48,7 +48,7 @@
                     </t-space>
                   </template>
                 </t-table>
-                <t-divider />
+                <t-divider style="margin: var(--td-comp-margin-s) 0" />
                 <p>
                   <span>数据由</span>
                   <t-link theme="primary" href="https://huaweiba.live/">华为吧</t-link>
@@ -129,7 +129,7 @@
                       </div>
                     </div>
                   </div>
-                  <t-divider />
+                  <t-divider style="margin: var(--td-comp-margin-s) 0" />
                   <p>
                     <span>数据由</span>
                     <t-link theme="primary" href="https://huaweiba.live/">华为吧</t-link>
@@ -161,7 +161,7 @@
                       <div class="normal-tip">{{ item.vod_hot }}</div>
                     </div>
                   </div>
-                  <t-divider />
+                  <t-divider style="margin: var(--td-comp-margin-s) 0" />
                   <p>
                     <span>数据由</span>
                     <t-link theme="primary" href="https://www.ky.live">ky.live</t-link>
@@ -861,10 +861,6 @@ const hotSearchEvent = async (val) => {
 
   :deep(.t-loading__overlay) {
     border-radius: var(--td-radius-medium);
-  }
-
-  :deep(.t-divider) {
-    margin: var(--td-comp-margin-s) 0;
   }
 
   :deep(.active) {

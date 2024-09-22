@@ -101,7 +101,7 @@
 
       <t-card title="探讨交流" :bordered="false" class="card-item t-card-tag detail-comments">
         <t-comment :avatar="formatAvatar(userStore.email)" v-if="!active.replyDialog">
-          <template #content>
+          <template #content style="width: calc(100% - 36px)">
             <submit-view v-model="commentFormData.content" @submit="onSubmitComment" />
           </template>
         </t-comment>

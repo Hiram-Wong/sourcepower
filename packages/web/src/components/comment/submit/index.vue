@@ -3,8 +3,9 @@
     <slot name="header"></slot>
     <div class="reply-box-main">
       <div class="content">
-        <t-textarea v-model="textValue" placeholder="理性发言, 友善互动。" :autosize="{ minRows: 3, maxRows: 5 }" />
-        <div class="tip">支持 markdown 语法</div>
+        <Editor :value="textValue" :plugins="plugins" :locale="zhHans" @change="handleChange" class="editer" />
+        <!-- <t-textarea v-model="textValue" placeholder="理性发言, 友善互动。" :autosize="{ minRows: 3, maxRows: 5 }" />
+        <div class="tip">支持 markdown 语法</div> -->
       </div>
     </div>
     <div class="reply-box-footer">
@@ -19,7 +20,20 @@
 <script lang="js" setup>
 import { ref, watch } from 'vue';
 
-const emits = defineEmits(["update:modelValue", "submit"]);
+import 'bytemd/dist/index.css';
+import { Editor, Viewer } from '@bytemd/vue-next';
+import gfm from '@bytemd/plugin-gfm';
+import highlight from '@bytemd/plugin-highlight';
+import breaks from '@bytemd/plugin-breaks';
+import footnotes from '@bytemd/plugin-footnotes';
+import frontmatter from '@bytemd/plugin-frontmatter';
+import gemoji from '@bytemd/plugin-gemoji';
+import mediumZoom from '@bytemd/plugin-medium-zoom';
+import zhHans from 'bytemd/locales/zh_Hans.json';
+
+const plugins = [breaks(), highlight(), footnotes(), frontmatter(), gfm(), mediumZoom(), gemoji()];
+
+const emits = defineEmits(['update:modelValue', 'submit']);
 
 const props = defineProps({
   modelValue: {
@@ -40,18 +54,21 @@ watch(
 watch(
   () => textValue.value,
   (val) => {
-    emits("update:modelValue", val);
+    emits('update:modelValue', val);
   },
 );
 
 const handleSubmit = () => {
-  emits("submit", textValue.value);
+  emits('submit', textValue.value);
+};
+
+const handleChange = (val) => {
+  textValue.value = val;
 };
 </script>
 
 <style lang="less" scoped>
 .reply-box {
-
   .reply-box-header {
     display: flex;
     justify-content: space-between;
@@ -67,7 +84,7 @@ const handleSubmit = () => {
         color: var(--td-text-color-primary);
         border-radius: var(--td-radius-default);
         cursor: pointer;
-        transition: background-color .2s;
+        transition: background-color 0.2s;
 
         &:hover {
           background-color: var(--td-bg-color-container);
@@ -80,8 +97,18 @@ const handleSubmit = () => {
     margin-top: var(--td-comp-margin-xs);
 
     .content {
-      border: 1px solid var(--td-border-level-2-color);
-      border-radius: var(--td-radius-default);
+      .editer {
+        border-radius: var(--td-radius-medium);
+        overflow: hidden;
+
+        :deep(.bytemd) {
+          height: 223px;
+
+          .bytemd-toolbar-right {
+            display: none;
+          }
+        }
+      }
 
       &:is(:focus, :focus-within) {
         border-color: var(--td-brand-color);
@@ -103,7 +130,7 @@ const handleSubmit = () => {
   }
 
   .reply-box-footer {
-    margin-top: var(--td-comp-margin-xs);
+    margin-top: var(--td-comp-margin-m);
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -9,7 +9,7 @@
         <login v-if="active.view === 'login'" @change="switchType('register')" />
         <register v-else-if="active.view === 'register'" @change="switchType('login')" />
         <div class="agreement">
-          <t-divider />
+          <t-divider style="margin: var(--td-comp-margin-s) 0" />
           <p>
             <span>
               登录/注册代表你已同意
@@ -119,10 +119,6 @@ const handleDialog = (type) => {
         font-size: 13.5px;
         font-weight: 700;
 
-        :deep(.t-divider) {
-          margin: var(--td-comp-margin-s) 0;
-        }
-
         p {
           height: 24px;
           line-height: 24px;
@@ -154,10 +150,6 @@ const handleDialog = (type) => {
         left: 0;
         right: 0;
         bottom: var(--td-comp-margin-xxl);
-
-        :deep(.t-divider) {
-          display: none;
-        }
       }
     }
   }
