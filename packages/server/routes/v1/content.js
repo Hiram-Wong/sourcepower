@@ -131,8 +131,8 @@ router.get("/creator", async (req, res) => {
 });
 
 router.get("/history", authenticateJWT, async (req, res) => {
-  const { page = 1, pageSize = 12 } = req.query;
-  const offset = (page - 1) * pageSize;
+  const { page = 1, limit = 12 } = req.query;
+  const offset = (page - 1) * limit;
 
   try {
     let query = knex("t_content");
@@ -156,7 +156,7 @@ router.get("/history", authenticateJWT, async (req, res) => {
     queryTotal = queryTotal.where({ user_id: req.user.userId });
 
     const dataList = await query
-      .limit(pageSize)
+      .limit(limit)
       .offset(offset)
       .orderBy("id", "desc");
     const dataTotal = await queryTotal;

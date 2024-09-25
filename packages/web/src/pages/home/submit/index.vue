@@ -241,7 +241,7 @@ const getHistory = async () => {
   try {
     const response = await fetchContentHistory({
       page: pagination.value.current,
-      pageSize: pagination.value.pageSize,
+      limit: pagination.value.pageSize,
     });
 
     if (response.code === 0) {
