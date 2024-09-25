@@ -241,13 +241,13 @@ const getHistory = async () => {
   try {
     const response = await fetchContentHistory({
       page: pagination.value.current,
-      limit: pagination.value.pageSize,
+      pageSize: pagination.value.pageSize,
     });
 
     if (response.code === 0) {
       historyList.value = historyList.value.concat(response.data.list);
       pagination.value.total = response.data.total;
-      pagination.value.current = pagination.value.current;
+      pagination.value.current += 1;
     } else {
       MessagePlugin.error(`fail ${response.msg}`);
     }
