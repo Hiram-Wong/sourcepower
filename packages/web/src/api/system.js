@@ -3,7 +3,10 @@ import request from '@/utils/request';
 export function fetchInfo() {
   return request({
     url: '/v1/system/info',
-    method: 'get'
+    method: 'get',
+    params: {
+      timestamp: new Date().getTime(),
+    },
   });
 }
 
