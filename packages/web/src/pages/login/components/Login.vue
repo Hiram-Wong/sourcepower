@@ -37,7 +37,9 @@
 
     <t-form-item name="checked">
       <div class="check-container remember-pwd">
-        <div class="left"></div>
+        <div class="left">
+          <t-checkbox v-model="formData.checked" v-if="type === 'login'">记住账号密码</t-checkbox>
+        </div>
         <div class="right">
           <span class="registercloud tip" @click="handleRegister">注册新账号</span>
           <span class="gotologin tip" @click="type = 'login'" v-if="type === 'retrieve'">前往登录</span>
@@ -51,10 +53,11 @@
 
 <script setup lang="js">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { apiForgetPassword, apiSendMail } from '@/api/user';
+import { base64 } from '@/utils/crypto';
 import { useUserStore } from '@/store';
 import { useCounter } from '@/hooks';
 
@@ -65,6 +68,7 @@ const INITIAL_DATA = {
   email: '',
   password: '',
   verifyCode: '',
+  checked: false,
 };
 
 const FORM_RULES = {
@@ -85,6 +89,14 @@ const showPsw = ref(false);
 
 const router = useRouter();
 const route = useRoute();
+
+onMounted(() => {
+  if (userStore.remember.checked) {
+    formData.value.email = userStore.remember.email;
+    formData.value.password = base64.decode(userStore.remember.password);
+    formData.value.checked = userStore.remember.checked;
+  }
+});
 
 const sendCode = async () => {
   const { email } = formData.value;
@@ -109,6 +121,12 @@ const onSubmit = async (ctx) => {
     try {
       if (type.value === 'login') {
         await userStore.login({ email: formData.value.email, password: formData.value.password });
+
+        userStore.remember = {
+          email: formData.value.checked ? formData.value.email : null,
+          password: formData.value.checked ? base64.encode(formData.value.password) : null,
+          checked: formData.value.checked,
+        };
 
         MessagePlugin.success('登录成功');
 

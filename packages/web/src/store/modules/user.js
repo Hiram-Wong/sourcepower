@@ -12,8 +12,13 @@ const InitUserInfo = {
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    token: "",
+    token: null,
     userInfo: { ...InitUserInfo },
+    remember: {
+      email: null,
+      password: null,
+      checked: false,
+    }
   }),
   getters: {
     roles: (state) => {
@@ -70,17 +75,6 @@ export const useUserStore = defineStore("user", {
             };
           }
         }
-
-        //   if (token === "main_token") {
-        //     return {
-        //       name: "Tencent",
-        //       roles: ["all"],
-        //     };
-        //   }
-        //   return {
-        //     name: "td_dev",
-        //     roles: ["UserIndex", "DashboardBase", "login"],
-        //   };
       };
 
       let res = await mockRemoteUserInfo(this.token);

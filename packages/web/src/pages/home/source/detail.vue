@@ -210,7 +210,7 @@ import { fetchContentDetail } from '@/api/content';
 import { fetchSubscribeCode } from '@/api/subscribe';
 import { fetchComment, fetchReply, addReply, addComment, delReply, delComment } from '@/api/comment';
 import { formatDate, formatAvatar } from '@/utils/tool';
-import { base64 } from '@/utils/encode';
+import { base64 } from '@/utils/crypto';
 import request from '@/utils/request';
 import { info } from '@/utils/info/ext';
 
