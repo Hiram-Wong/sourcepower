@@ -3,12 +3,18 @@
   <guidance-view v-else />
 </template>
 <script setup>
-import { computed, reactive, onMounted } from 'vue';
+import { computed, reactive, onMounted, onUnmounted } from 'vue';
 
 import { useSettingStore } from '@/store';
 import GuidanceView from '@/pages/guidance/index.vue';
 
 const store = useSettingStore();
+
+const mediaQuery = window.matchMedia('(prefers-color-scheme:dark)');
+const themeWatcher = (e) => {
+  store.changeMode(e.matches ? 'dark' : 'light');
+};
+mediaQuery.addEventListener('change', themeWatcher);
 
 const mode = computed(() => {
   const theme = store.displayMode;
@@ -27,6 +33,10 @@ onMounted(() => {
   };
 
   active.webview = isWebview(userAgent);
+});
+
+onUnmounted(() => {
+  mediaQuery.removeEventListener('change', updateTheme);
 });
 </script>
 
