@@ -68,13 +68,7 @@
                 </template>
                 {{ detailData.data }}</t-link
               >
-              <t-textarea
-                v-else
-                :value="detailData.content"
-                :autosize="{ minRows: 3, maxRows: 10 }"
-                :readonly="true"
-                class="textarea"
-              />
+              <render-markdown v-else :markdownText="formatContent(detailData.content, 'js')" />
             </div>
           </div>
           <div v-if="detailData.ext" class="detail-content-item">
@@ -89,12 +83,7 @@
                 <info-circle-icon size="16px" style="margin-left: 6px; padding-bottom: 2px" />
               </t-tooltip>
             </p>
-            <t-textarea
-              :value="detailData.ext"
-              :autosize="{ minRows: 3, maxRows: 5 }"
-              :readonly="true"
-              class="textarea"
-            />
+            <render-markdown :markdownText="formatContent(detailData.ext, 'json')" />
           </div>
         </t-watermark>
       </t-card>
@@ -251,6 +240,10 @@ const formatUrl = (str) => {
   if (str && typeof str === 'string' && str.startsWith('http')) {
     return true;
   } else return false;
+};
+
+const formatContent = (str, lang) => {
+  return '```' + lang + '\n' + str + '\n```';
 };
 
 const fetchData = async (id) => {
