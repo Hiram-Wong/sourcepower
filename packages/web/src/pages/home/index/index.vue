@@ -47,7 +47,7 @@
 
       <t-card title="专属仓库" :bordered="false" class="card-item t-card-tag">
         <div class="personal">
-          <p class="tip">制作专属于你的数据吧, 请自行建立本地仓并维护。</p>
+          <p class="tip">制作属于自己数据, 请自行建立本地仓并维护。</p>
           <t-steps layout="vertical" :current="8" theme="dot" readonly>
             <t-step-item title="步骤一">
               <template #content>
